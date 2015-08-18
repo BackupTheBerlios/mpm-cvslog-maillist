@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.21,1.22
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/mpm-cvslog/2007-June/index.html" >
+   <LINK REL="made" HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.21%2C1.22&In-Reply-To=%3C20070620104850.67BA56F962%40mail.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000040.html">
+   <LINK REL="Next"  HREF="000042.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.21,1.22</H1>
+    <B>ivop</B> 
+    <A HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.21%2C1.22&In-Reply-To=%3C20070620104850.67BA56F962%40mail.berlios.de%3E"
+       TITLE="[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.21,1.22">nobody at sheep.berlios.de
+       </A><BR>
+    <I>Wed Jun 20 12:48:50 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000040.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.20,1.21
+</A></li>
+        <LI>Next message: <A HREF="000042.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.22,1.23
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#41">[ date ]</a>
+              <a href="thread.html#41">[ thread ]</a>
+              <a href="subject.html#41">[ subject ]</a>
+              <a href="author.html#41">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv18600
+
+Modified Files:
+	start.sh 
+Log Message:
+if we do kill dhcpd, sleep a bit so we are (pretty) sure that our eth driver
+got resurrected, so it can be killed gently afterwards
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.21
+retrieving revision 1.22
+diff -u -d -r1.21 -r1.22
+--- start.sh	20 Jun 2007 10:44:30 -0000	1.21
++++ start.sh	20 Jun 2007 10:46:26 -0000	1.22
+@@ -194,7 +194,7 @@
+ kill_proc_by_fullname() {
+     tmp=`ps -ef | grep $1 | grep -v grep`
+     pid=`echo $tmp | cut -d ' ' -f 4`
+-    test -n &quot;$pid&quot; &amp;&amp; kill $2 $pid
++    test -n &quot;$pid&quot; &amp;&amp; kill $2 $pid &amp;&amp; sleep 3
+ }
+ 
+ network_restart() {
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000040.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.20,1.21
+</A></li>
+	<LI>Next message: <A HREF="000042.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.22,1.23
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#41">[ date ]</a>
+              <a href="thread.html#41">[ thread ]</a>
+              <a href="subject.html#41">[ subject ]</a>
+              <a href="author.html#41">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">More information about the Mpm-cvslog
+mailing list</a><br>
+</body></html>

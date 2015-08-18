@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.33,1.34
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/mpm-cvslog/2007-June/index.html" >
+   <LINK REL="made" HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.33%2C1.34&In-Reply-To=%3C20070630213226.8E9C7F0CB0%40mail.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000058.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.33,1.34</H1>
+    <B>ivop</B> 
+    <A HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.33%2C1.34&In-Reply-To=%3C20070630213226.8E9C7F0CB0%40mail.berlios.de%3E"
+       TITLE="[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.33,1.34">nobody at sheep.berlios.de
+       </A><BR>
+    <I>Sat Jun 30 23:32:26 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000058.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.32,1.33
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#59">[ date ]</a>
+              <a href="thread.html#59">[ thread ]</a>
+              <a href="subject.html#59">[ subject ]</a>
+              <a href="author.html#59">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv31531
+
+Modified Files:
+	start.sh 
+Log Message:
+selection of primary partition
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.33
+retrieving revision 1.34
+diff -u -d -r1.33 -r1.34
+--- start.sh	24 Jun 2007 23:35:50 -0000	1.33
++++ start.sh	30 Jun 2007 21:32:22 -0000	1.34
+@@ -287,15 +287,34 @@
+ &quot; 20 76 
+ }
+ 
++devdump=/tmp/devdump
++primdump=/tmp/primdump
++
++select_prim_part() {
++    dialog --infobox &quot;Scanning devices...&quot; 3 40
++    printparts -m -d -c &gt; $devdump
++
++    grep &quot;^    [^ ]&quot; $devdump | cut -d ')' -f 1 |
++        sed 's/\(.*\)/\1 _ off/' &gt; $primdump
++    primlist=`cat $primdump`
++
++    instprim=`dialog --stdout --keep-window --begin 3 1 \
++        --infobox &quot;This are the devices I found...&quot; 3 50 \
++        --and-widget --keep-window --begin 8 1 --exit-label &quot;Continue&quot; \
++        --textbox $devdump 15 50 \
++        --and-widget --begin 3 54 --no-cancel \
++        --radiolist &quot;Select partition&quot; 20 23 13 $primlist `
++}
++
+ part_menu() {
+-    r=&quot;&quot;
+-    while test &quot;$r&quot; != &quot;Select Partition&quot; ; do
++    while test -z &quot;$instprim&quot; ; do
+         r=`dialog \
+                 --stdout --no-cancel \
+                 --menu &quot;What do you want to do?&quot; 0 0 0 \
+-                &quot;Select Partition&quot; &quot;&quot; \
++                &quot;Select Primary Partition&quot; &quot;&quot; \
+                 &quot;Partition Editor&quot; &quot;&quot; `
+         case &quot;$r&quot; in
++            Sele*)  select_prim_part    ;;
+             Part*)  part    ;;
+         esac
+     done
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000058.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.32,1.33
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#59">[ date ]</a>
+              <a href="thread.html#59">[ thread ]</a>
+              <a href="subject.html#59">[ subject ]</a>
+              <a href="author.html#59">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">More information about the Mpm-cvslog
+mailing list</a><br>
+</body></html>

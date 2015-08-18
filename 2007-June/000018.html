@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Mpm-cvslog] mpmports/BOOTDISK rc.usr,1.9,1.10
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/mpm-cvslog/2007-June/index.html" >
+   <LINK REL="made" HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20rc.usr%2C1.9%2C1.10&In-Reply-To=%3C20070617230446.DC6DFF4C95%40mail.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000017.html">
+   <LINK REL="Next"  HREF="000019.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Mpm-cvslog] mpmports/BOOTDISK rc.usr,1.9,1.10</H1>
+    <B>ivop</B> 
+    <A HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20rc.usr%2C1.9%2C1.10&In-Reply-To=%3C20070617230446.DC6DFF4C95%40mail.berlios.de%3E"
+       TITLE="[Mpm-cvslog] mpmports/BOOTDISK rc.usr,1.9,1.10">nobody at sheep.berlios.de
+       </A><BR>
+    <I>Mon Jun 18 01:04:46 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000017.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.8,1.9
+</A></li>
+        <LI>Next message: <A HREF="000019.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.9,1.10
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18">[ date ]</a>
+              <a href="thread.html#18">[ thread ]</a>
+              <a href="subject.html#18">[ subject ]</a>
+              <a href="author.html#18">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv21005
+
+Modified Files:
+	rc.usr 
+Log Message:
+it's not bintool but boottool
+
+
+Index: rc.usr
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/rc.usr,v
+retrieving revision 1.9
+retrieving revision 1.10
+diff -u -d -r1.9 -r1.10
+--- rc.usr	17 Jun 2007 22:07:28 -0000	1.9
++++ rc.usr	17 Jun 2007 23:02:24 -0000	1.10
+@@ -40,7 +40,7 @@
+ 
+ echo -n &quot;Reordering filesystem: &quot;
+ rm -f /usr.bz2
+-cp /usr/bin/sh /bin/sh      # overwrite bintool
++cp /usr/bin/sh /bin/sh      # overwrite boottool
+ mkdir /usr/tmp /usr/adm /usr/run /mnt
+ ln -s /usr/tmp /tmp
+ rm -rf /dev
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000017.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.8,1.9
+</A></li>
+	<LI>Next message: <A HREF="000019.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.9,1.10
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18">[ date ]</a>
+              <a href="thread.html#18">[ thread ]</a>
+              <a href="subject.html#18">[ subject ]</a>
+              <a href="author.html#18">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">More information about the Mpm-cvslog
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Mpm-cvslog] lazybox lazybox.c,1.12,1.13
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/mpm-cvslog/2007-October/index.html" >
+   <LINK REL="made" HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20lazybox%20lazybox.c%2C1.12%2C1.13&In-Reply-To=%3C20071030105849.7C2CEDC35B%40mail.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000062.html">
+   <LINK REL="Next"  HREF="000064.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Mpm-cvslog] lazybox lazybox.c,1.12,1.13</H1>
+    <B>ivop</B> 
+    <A HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20lazybox%20lazybox.c%2C1.12%2C1.13&In-Reply-To=%3C20071030105849.7C2CEDC35B%40mail.berlios.de%3E"
+       TITLE="[Mpm-cvslog] lazybox lazybox.c,1.12,1.13">nobody at sheep.berlios.de
+       </A><BR>
+    <I>Tue Oct 30 11:58:49 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000062.html">[Mpm-cvslog] lazybox Makefile,1.8,1.9
+</A></li>
+        <LI>Next message: <A HREF="000064.html">[Mpm-cvslog] lazybox lazybox.c,1.13,1.14
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#63">[ date ]</a>
+              <a href="thread.html#63">[ thread ]</a>
+              <a href="subject.html#63">[ subject ]</a>
+              <a href="author.html#63">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Update of /cvsroot/mpm/lazybox
+In directory sheep:/tmp/cvs-serv16821
+
+Modified Files:
+	lazybox.c 
+Log Message:
+protect against missing passwd or group file
+
+
+Index: lazybox.c
+===================================================================
+RCS file: /cvsroot/mpm/lazybox/lazybox.c,v
+retrieving revision 1.12
+retrieving revision 1.13
+diff -u -d -r1.12 -r1.13
+--- lazybox.c	21 Jun 2007 10:25:01 -0000	1.12
++++ lazybox.c	30 Oct 2007 10:57:59 -0000	1.13
+@@ -102,10 +102,12 @@
+     if (sugid &gt;= 0) { /* drop to listed privileges */
+         if (sugidbins[sugid].u) {
+             pwd = getpwnam(sugidbins[sugid].u);
++            if (pwd)
+             uid = pwd-&gt;pw_uid;
+         }
+         if (sugidbins[sugid].g) {
+             grp = getgrnam(sugidbins[sugid].g);
++            if (grp)
+             gid = grp-&gt;gr_gid;
+         }
+     }
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000062.html">[Mpm-cvslog] lazybox Makefile,1.8,1.9
+</A></li>
+	<LI>Next message: <A HREF="000064.html">[Mpm-cvslog] lazybox lazybox.c,1.13,1.14
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#63">[ date ]</a>
+              <a href="thread.html#63">[ thread ]</a>
+              <a href="subject.html#63">[ subject ]</a>
+              <a href="author.html#63">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">More information about the Mpm-cvslog
+mailing list</a><br>
+</body></html>

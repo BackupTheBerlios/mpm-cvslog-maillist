@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.35,1.36
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/mpm-cvslog/2007-July/index.html" >
+   <LINK REL="made" HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.35%2C1.36&In-Reply-To=%3C20070702111224.7289AF669A%40mail.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000060.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.35,1.36</H1>
+    <B>ivop</B> 
+    <A HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.35%2C1.36&In-Reply-To=%3C20070702111224.7289AF669A%40mail.berlios.de%3E"
+       TITLE="[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.35,1.36">nobody at sheep.berlios.de
+       </A><BR>
+    <I>Mon Jul  2 13:12:24 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000060.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.34,1.35
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#61">[ date ]</a>
+              <a href="thread.html#61">[ thread ]</a>
+              <a href="subject.html#61">[ subject ]</a>
+              <a href="author.html#61">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv14906
+
+Modified Files:
+	start.sh 
+Log Message:
+pretty much hardcoded autopart sizes for now. make / 32MB. the default of
+the vucsm install (16MB) is a bit small
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.35
+retrieving revision 1.36
+diff -u -d -r1.35 -r1.36
+--- start.sh	30 Jun 2007 22:13:57 -0000	1.35
++++ start.sh	2 Jul 2007 11:12:18 -0000	1.36
+@@ -6,6 +6,7 @@
+ TERM=minix-color
+ eval DIALOGOPTS=\'--backtitle &quot;\&quot;               The MPMPORTS Minix Distribution, $VERSION\&quot;&quot;\'
+ export TERM TERMCAP DIALOGOPTS
++maxmnxfssize=2048       # or was it 4096? check later
+ 
+ # -----------------------------------------------------------------------------
+ 
+@@ -325,35 +326,51 @@
+ 
+     doautopart=no
+ 
+-    insts0=&quot;$instprim/s0&quot;
+-    insts1=&quot;$instprim/s1&quot;
+-    insts2=&quot;$instprim/s2&quot;
++    insts0=&quot;${instprim}s0&quot;
++    insts1=&quot;${instprim}s1&quot;
++    insts2=&quot;${instprim}s2&quot;
+ 
+     s0=`cat $devdump | grep &quot;$insts0&quot;`
+     s1=`cat $devdump | grep &quot;$insts1&quot;`
+     s2=`cat $devdump | grep &quot;$insts2&quot;`
+ 
+-    r=&quot;&quot;
+-    while test -z &quot;$r&quot; ; do
+-        if test -n &quot;$s0&quot; -a -n &quot;$s1&quot; -a -n &quot;$s2&quot; ; then
++    if test -n &quot;$s0&quot; -a -n &quot;$s1&quot; -a -n &quot;$s2&quot; ; then
++        r=&quot;&quot;
++        while test -z &quot;$r&quot; ; do
+             dialog --stdout --no-cancel --yesno \
+ &quot;Selected primary partition: $instprim
+ 
+ Use existing sub-partitions?&quot; 7 50
+             r=&quot;$?&quot;
+             case &quot;$r&quot; in
+-                0)  return  ;;
++                0)
++                    insts0size=`echo $s0 | cut -d '(' -f 2 | cut -d ' ' -f 1`
++                    insts1size=`echo $s1 | cut -d '(' -f 2 | cut -d ' ' -f 1`
++                    insts2size=`echo $s2 | cut -d '(' -f 2 | cut -d ' ' -f 1`
++                    return  ;;
+                 1)          ;;  # NO, next step
+                 *)  r=&quot;&quot;    ;;  # ESC, repeat
+             esac
+-        fi
+-    done
++        done
++    fi
+ 
+     doautopart=yes
++
++    instprimsize=`cat $devdump | head -1 | cut -d '(' -f 2 | cut -d ' ' -f 1`
++    t=`expr $instprimsize - 32`
++    insts0size=32
++    insts1size=`expr $t / 2`
++    test $insts1size -lt $maxmnxfssize &amp;&amp; insts1size=$maxmnxfssize
++    insts2size=$insts1size
++}
++
++fmt_check() {
++    :
+ }
+ 
+ part_confirm() {
+     :
++    partdone=yes
+ }
+ 
+ partitions() {
+@@ -364,6 +381,7 @@
+         instprim=&quot;&quot;
+         part_menu
+         part_subs
++        fmt_check
+         part_confirm
+     done
+ }
+@@ -385,6 +403,10 @@
+ insts0=&quot;&quot;       # /
+ insts1=&quot;&quot;       # /home
+ insts2=&quot;&quot;       # /usr
++instprimsize=&quot;&quot;
++insts0size=&quot;&quot;
++insts1size=&quot;&quot;
++insts2size=&quot;&quot;
+ doautopart=no
+ formats0=yes
+ formats1=no
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000060.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.34,1.35
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#61">[ date ]</a>
+              <a href="thread.html#61">[ thread ]</a>
+              <a href="subject.html#61">[ subject ]</a>
+              <a href="author.html#61">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">More information about the Mpm-cvslog
+mailing list</a><br>
+</body></html>

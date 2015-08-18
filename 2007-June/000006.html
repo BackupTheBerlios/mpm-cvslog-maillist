@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.4,1.5
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/mpm-cvslog/2007-June/index.html" >
+   <LINK REL="made" HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.4%2C1.5&In-Reply-To=%3C20070616231304.05A30D8B52%40mail.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000005.html">
+   <LINK REL="Next"  HREF="000007.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.4,1.5</H1>
+    <B>ivop</B> 
+    <A HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.4%2C1.5&In-Reply-To=%3C20070616231304.05A30D8B52%40mail.berlios.de%3E"
+       TITLE="[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.4,1.5">nobody at sheep.berlios.de
+       </A><BR>
+    <I>Sun Jun 17 01:13:04 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000005.html">[Mpm-cvslog] mpmports/BOOTDISK README,1.8,1.9
+</A></li>
+        <LI>Next message: <A HREF="000007.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.5,1.6
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6">[ date ]</a>
+              <a href="thread.html#6">[ thread ]</a>
+              <a href="subject.html#6">[ subject ]</a>
+              <a href="author.html#6">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv30337
+
+Modified Files:
+	start.sh 
+Log Message:
+network settings
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.4
+retrieving revision 1.5
+diff -u -d -r1.4 -r1.5
+--- start.sh	15 Jun 2007 10:26:55 -0000	1.4
++++ start.sh	16 Jun 2007 23:10:40 -0000	1.5
+@@ -114,16 +114,49 @@
+     ethargs=&quot;${ethdriver}_args='&quot;`echo &quot;$q&quot; | cut -d '@' -f 2`&quot;'&quot;
+ }
+ 
++dhcp_or_manual() {
++    r=`dialog --no-cancel --stdout \
++              --radiolist \
++              &quot;Network Settings&quot; 0 0 0 \
++              &quot;Manual&quot; &quot;&quot; on \
++              &quot;DHCP&quot; &quot;&quot; off `
++    test &quot;$r&quot; = &quot;Manual&quot; &amp;&amp; netdhcp=0 || netdhcp=1
++}
++
++network_settings() {
++    r=`dialog --no-cancel --stdout \
++              --form \
++              &quot;Network Settings&quot; 0 0 0 \
++              &quot;IP Address&quot; 1 0 &quot;$netip&quot;   1 15 15 15 \
++              &quot;Netmask&quot;    2 0 &quot;$netmask&quot; 2 15 15 15 \
++              &quot;Nameserver&quot; 3 0 &quot;$netdns&quot;  3 15 15 15 \
++              &quot;Gateway&quot;    4 0 &quot;$netgw&quot;   4 15 15 15 \
++              &quot;MTU&quot;        5 0 &quot;$netmtu&quot;  5 15  5  5 `
++    netip=`  echo &quot;$r&quot; | head -1`
++    netmask=`echo &quot;$r&quot; | head -2 | tail -1`
++    netdns=` echo &quot;$r&quot; | head -3 | tail -1`
++    netgw=`  echo &quot;$r&quot; | head -4 | tail -1`
++    netmtu=` echo &quot;$r&quot; | head -5 | tail -1`
++}
++
+ # -----------------------------------------------------------------------------
+ 
+ ethdriver=&quot;none&quot;
+ ethargs=&quot;&quot;
++netdhcp=0
++netip=192.168.0.
++netmask=255.255.255.0
++netdns=192.168.0.1
++netgw=192.168.0.1
++netmtu=1500
+ 
+ welcome
+ set_keymap
+ time_and_date
+ at_or_bios_wini
+ ethernet_chip
++dhcp_or_manual
++test $netdhcp -eq 0 &amp;&amp; network_settings
+ 
+ # -----------------------------------------------------------------------------
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000005.html">[Mpm-cvslog] mpmports/BOOTDISK README,1.8,1.9
+</A></li>
+	<LI>Next message: <A HREF="000007.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.5,1.6
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6">[ date ]</a>
+              <a href="thread.html#6">[ thread ]</a>
+              <a href="subject.html#6">[ subject ]</a>
+              <a href="author.html#6">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">More information about the Mpm-cvslog
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.3,1.4
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/mpm-cvslog/2007-June/index.html" >
+   <LINK REL="made" HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.3%2C1.4&In-Reply-To=%3C20070615102917.0A6D5F3D48%40mail.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000001.html">
+   <LINK REL="Next"  HREF="000003.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.3,1.4</H1>
+    <B>ivop</B> 
+    <A HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.3%2C1.4&In-Reply-To=%3C20070615102917.0A6D5F3D48%40mail.berlios.de%3E"
+       TITLE="[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.3,1.4">nobody at sheep.berlios.de
+       </A><BR>
+    <I>Fri Jun 15 12:29:17 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000001.html">[Mpm-cvslog] mpmports/BOOTDISK Makefile, 1.9, 1.10 usr.proto, 1.6,	1.7
+</A></li>
+        <LI>Next message: <A HREF="000003.html">[Mpm-cvslog] mpmports/BOOTDISK Makefile,1.10,1.11
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2">[ date ]</a>
+              <a href="thread.html#2">[ thread ]</a>
+              <a href="subject.html#2">[ subject ]</a>
+              <a href="author.html#2">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv22955
+
+Modified Files:
+	start.sh 
+Log Message:
+selection of network card
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.3
+retrieving revision 1.4
+diff -u -d -r1.3 -r1.4
+--- start.sh	15 Jun 2007 09:15:53 -0000	1.3
++++ start.sh	15 Jun 2007 10:26:55 -0000	1.4
+@@ -88,10 +88,42 @@
+ 
+ # -----------------------------------------------------------------------------
+ 
++ethernet_chip() {
++    r=`dialog --no-cancel --stdout \
++              --radiolist \
++              &quot;Please select your ethernet card&quot; 0 0 0 \
++              &quot;0&quot; &quot;No networking&quot; off \
++              &quot;1&quot; &quot;Intel Pro/100&quot; off \
++              &quot;2&quot; &quot;3Com 501 / 3Com 509 based card&quot; off \
++              &quot;3&quot; &quot;Realtek 8139 based card&quot; off \
++              &quot;4&quot; &quot;Realtek 8029 based card (use by Qemu)&quot; off \
++              &quot;5&quot; &quot;NE2000, 3Com 503 or WD based card (used by Bochs)&quot; off \
++              &quot;6&quot; &quot;AMD LANCE (used by VMware)&quot; on `
++
++    case $r in
++        1)  q=&quot;fxp@&quot; ;;
++        2)  q=&quot;dpeth@&quot; ;;
++        3)  q=&quot;rtl8139@&quot; ;;
++        4)  q=&quot;<A HREF="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">dp8390 at DPETH0</A>=pci&quot; ;;
++        5)  q=&quot;<A HREF="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">dp8390 at DPETH0</A>=240:9&quot; ;;
++        6)  q=&quot;lance@&quot; ;;
++        *)  q=&quot;none@&quot; ;;
++    esac
++
++    ethdriver=`echo &quot;$q&quot; | cut -d '@' -f 1`
++    ethargs=&quot;${ethdriver}_args='&quot;`echo &quot;$q&quot; | cut -d '@' -f 2`&quot;'&quot;
++}
++
++# -----------------------------------------------------------------------------
++
++ethdriver=&quot;none&quot;
++ethargs=&quot;&quot;
++
+ welcome
+ set_keymap
+ time_and_date
+ at_or_bios_wini
++ethernet_chip
+ 
+ # -----------------------------------------------------------------------------
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000001.html">[Mpm-cvslog] mpmports/BOOTDISK Makefile, 1.9, 1.10 usr.proto, 1.6,	1.7
+</A></li>
+	<LI>Next message: <A HREF="000003.html">[Mpm-cvslog] mpmports/BOOTDISK Makefile,1.10,1.11
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2">[ date ]</a>
+              <a href="thread.html#2">[ thread ]</a>
+              <a href="subject.html#2">[ subject ]</a>
+              <a href="author.html#2">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">More information about the Mpm-cvslog
+mailing list</a><br>
+</body></html>

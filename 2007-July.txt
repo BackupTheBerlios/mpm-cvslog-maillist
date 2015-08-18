@@ -1,0 +1,214 @@
+From nobody at sheep.berlios.de  Sun Jul  1 00:14:01 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Sun,  1 Jul 2007 00:14:01 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.34,1.35
+Message-ID: <20070630221401.DEC90F6860@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv1656
+
+Modified Files:
+	start.sh 
+Log Message:
+sub-partitions
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.34
+retrieving revision 1.35
+diff -u -d -r1.34 -r1.35
+--- start.sh	30 Jun 2007 21:32:22 -0000	1.34
++++ start.sh	30 Jun 2007 22:13:57 -0000	1.35
+@@ -320,12 +320,51 @@
+     done
+ }
+ 
++part_subs() {
++    printparts -m -d | grep "$instprim" > $devdump
++
++    doautopart=no
++
++    insts0="$instprim/s0"
++    insts1="$instprim/s1"
++    insts2="$instprim/s2"
++
++    s0=`cat $devdump | grep "$insts0"`
++    s1=`cat $devdump | grep "$insts1"`
++    s2=`cat $devdump | grep "$insts2"`
++
++    r=""
++    while test -z "$r" ; do
++        if test -n "$s0" -a -n "$s1" -a -n "$s2" ; then
++            dialog --stdout --no-cancel --yesno \
++"Selected primary partition: $instprim
++
++Use existing sub-partitions?" 7 50
++            r="$?"
++            case "$r" in
++                0)  return  ;;
++                1)          ;;  # NO, next step
++                *)  r=""    ;;  # ESC, repeat
++            esac
++        fi
++    done
++
++    doautopart=yes
++}
++
++part_confirm() {
++    :
++}
++
+ partitions() {
+     partdone=no
+ 
+     while test "$partdone" = "no" ; do
+         part_intro
++        instprim=""
+         part_menu
++        part_subs
++        part_confirm
+     done
+ }
+ 
+@@ -346,12 +385,16 @@
+ insts0=""       # /
+ insts1=""       # /home
+ insts2=""       # /usr
++doautopart=no
++formats0=yes
++formats1=no
++formats2=yes
+ 
+ welcome
+-set_keymap
+-time_and_date
+-at_or_bios_wini
+-network
++#set_keymap
++#time_and_date
++#at_or_bios_wini
++#network
+ partitions
+ 
+ # -----------------------------------------------------------------------------
+
+
+
+From nobody at sheep.berlios.de  Mon Jul  2 13:12:24 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon,  2 Jul 2007 13:12:24 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.35,1.36
+Message-ID: <20070702111224.7289AF669A@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv14906
+
+Modified Files:
+	start.sh 
+Log Message:
+pretty much hardcoded autopart sizes for now. make / 32MB. the default of
+the vucsm install (16MB) is a bit small
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.35
+retrieving revision 1.36
+diff -u -d -r1.35 -r1.36
+--- start.sh	30 Jun 2007 22:13:57 -0000	1.35
++++ start.sh	2 Jul 2007 11:12:18 -0000	1.36
+@@ -6,6 +6,7 @@
+ TERM=minix-color
+ eval DIALOGOPTS=\'--backtitle "\"               The MPMPORTS Minix Distribution, $VERSION\""\'
+ export TERM TERMCAP DIALOGOPTS
++maxmnxfssize=2048       # or was it 4096? check later
+ 
+ # -----------------------------------------------------------------------------
+ 
+@@ -325,35 +326,51 @@
+ 
+     doautopart=no
+ 
+-    insts0="$instprim/s0"
+-    insts1="$instprim/s1"
+-    insts2="$instprim/s2"
++    insts0="${instprim}s0"
++    insts1="${instprim}s1"
++    insts2="${instprim}s2"
+ 
+     s0=`cat $devdump | grep "$insts0"`
+     s1=`cat $devdump | grep "$insts1"`
+     s2=`cat $devdump | grep "$insts2"`
+ 
+-    r=""
+-    while test -z "$r" ; do
+-        if test -n "$s0" -a -n "$s1" -a -n "$s2" ; then
++    if test -n "$s0" -a -n "$s1" -a -n "$s2" ; then
++        r=""
++        while test -z "$r" ; do
+             dialog --stdout --no-cancel --yesno \
+ "Selected primary partition: $instprim
+ 
+ Use existing sub-partitions?" 7 50
+             r="$?"
+             case "$r" in
+-                0)  return  ;;
++                0)
++                    insts0size=`echo $s0 | cut -d '(' -f 2 | cut -d ' ' -f 1`
++                    insts1size=`echo $s1 | cut -d '(' -f 2 | cut -d ' ' -f 1`
++                    insts2size=`echo $s2 | cut -d '(' -f 2 | cut -d ' ' -f 1`
++                    return  ;;
+                 1)          ;;  # NO, next step
+                 *)  r=""    ;;  # ESC, repeat
+             esac
+-        fi
+-    done
++        done
++    fi
+ 
+     doautopart=yes
++
++    instprimsize=`cat $devdump | head -1 | cut -d '(' -f 2 | cut -d ' ' -f 1`
++    t=`expr $instprimsize - 32`
++    insts0size=32
++    insts1size=`expr $t / 2`
++    test $insts1size -lt $maxmnxfssize && insts1size=$maxmnxfssize
++    insts2size=$insts1size
++}
++
++fmt_check() {
++    :
+ }
+ 
+ part_confirm() {
+     :
++    partdone=yes
+ }
+ 
+ partitions() {
+@@ -364,6 +381,7 @@
+         instprim=""
+         part_menu
+         part_subs
++        fmt_check
+         part_confirm
+     done
+ }
+@@ -385,6 +403,10 @@
+ insts0=""       # /
+ insts1=""       # /home
+ insts2=""       # /usr
++instprimsize=""
++insts0size=""
++insts1size=""
++insts2size=""
+ doautopart=no
+ formats0=yes
+ formats1=no
+
+
+

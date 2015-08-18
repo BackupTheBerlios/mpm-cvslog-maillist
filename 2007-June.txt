@@ -1,0 +1,3405 @@
+From nobody at sheep.berlios.de  Fri Jun 15 11:18:14 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Fri, 15 Jun 2007 11:18:14 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.2,1.3
+Message-ID: <20070615091814.9FEE5F2720@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv16564
+
+Modified Files:
+	start.sh 
+Log Message:
+silence setting time
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.2
+retrieving revision 1.3
+diff -u -d -r1.2 -r1.3
+--- start.sh	10 Nov 2006 19:31:09 -0000	1.2
++++ start.sh	15 Jun 2007 09:15:53 -0000	1.3
+@@ -57,7 +57,7 @@
+     h=`echo $r | cut -d ':' -f 1`
+     m=`echo $r | cut -d ':' -f 2`
+     s=`echo $r | cut -d ':' -f 3`
+-    date $h$m$s
++    date $h$m$s >/dev/null
+ }
+ 
+ time_and_date() {
+
+
+
+From nobody at sheep.berlios.de  Fri Jun 15 11:18:57 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Fri, 15 Jun 2007 11:18:57 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK Makefile, 1.9, 1.10 usr.proto, 1.6,
+	1.7
+Message-ID: <20070615091857.54A2EABD3F@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv16607
+
+Modified Files:
+	Makefile usr.proto 
+Log Message:
+add printparts to usr fs
+
+
+Index: Makefile
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/Makefile,v
+retrieving revision 1.9
+retrieving revision 1.10
+diff -u -d -r1.9 -r1.10
+--- Makefile	31 Oct 2006 12:16:07 -0000	1.9
++++ Makefile	15 Jun 2007 09:16:36 -0000	1.10
+@@ -9,7 +9,10 @@
+ 
+ .PHONY: fd0 diskimage
+ 
+-usr.bz2: usr.proto rc.usr
++printparts/printparts:
++	cd printparts && make
++
++usr.bz2: usr.proto rc.usr printparts/printparts
+ 	@sh mk.usr.sh
+ 
+ boottool/boottool:
+
+Index: usr.proto
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/usr.proto,v
+retrieving revision 1.6
+retrieving revision 1.7
+diff -u -d -r1.6 -r1.7
+--- usr.proto	10 Nov 2006 19:32:28 -0000	1.6
++++ usr.proto	15 Jun 2007 09:16:36 -0000	1.7
+@@ -17,6 +17,7 @@
+         dialog ---755 0 0 /usr/local/bin/dialog
+         loadkeys ---755 0 0 /bin/loadkeys
+         start.sh ---755 0 0 start.sh
++        printparts ---755 0 0 printparts/printparts
+ 	$
+ 	etc d--755 0 0
+         rc ---755 0 0 rc.usr
+
+
+
+From nobody at sheep.berlios.de  Fri Jun 15 12:29:17 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Fri, 15 Jun 2007 12:29:17 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.3,1.4
+Message-ID: <20070615102917.0A6D5F3D48@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv22955
+
+Modified Files:
+	start.sh 
+Log Message:
+selection of network card
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.3
+retrieving revision 1.4
+diff -u -d -r1.3 -r1.4
+--- start.sh	15 Jun 2007 09:15:53 -0000	1.3
++++ start.sh	15 Jun 2007 10:26:55 -0000	1.4
+@@ -88,10 +88,42 @@
+ 
+ # -----------------------------------------------------------------------------
+ 
++ethernet_chip() {
++    r=`dialog --no-cancel --stdout \
++              --radiolist \
++              "Please select your ethernet card" 0 0 0 \
++              "0" "No networking" off \
++              "1" "Intel Pro/100" off \
++              "2" "3Com 501 / 3Com 509 based card" off \
++              "3" "Realtek 8139 based card" off \
++              "4" "Realtek 8029 based card (use by Qemu)" off \
++              "5" "NE2000, 3Com 503 or WD based card (used by Bochs)" off \
++              "6" "AMD LANCE (used by VMware)" on `
++
++    case $r in
++        1)  q="fxp@" ;;
++        2)  q="dpeth@" ;;
++        3)  q="rtl8139@" ;;
++        4)  q="dp8390 at DPETH0=pci" ;;
++        5)  q="dp8390 at DPETH0=240:9" ;;
++        6)  q="lance@" ;;
++        *)  q="none@" ;;
++    esac
++
++    ethdriver=`echo "$q" | cut -d '@' -f 1`
++    ethargs="${ethdriver}_args='"`echo "$q" | cut -d '@' -f 2`"'"
++}
++
++# -----------------------------------------------------------------------------
++
++ethdriver="none"
++ethargs=""
++
+ welcome
+ set_keymap
+ time_and_date
+ at_or_bios_wini
++ethernet_chip
+ 
+ # -----------------------------------------------------------------------------
+ 
+
+
+
+From nobody at sheep.berlios.de  Fri Jun 15 12:33:52 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Fri, 15 Jun 2007 12:33:52 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK Makefile,1.10,1.11
+Message-ID: <20070615103352.51241E0A10@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv25112
+
+Modified Files:
+	Makefile 
+Log Message:
+add lazybox dep
+
+
+Index: Makefile
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/Makefile,v
+retrieving revision 1.10
+retrieving revision 1.11
+diff -u -d -r1.10 -r1.11
+--- Makefile	15 Jun 2007 09:16:36 -0000	1.10
++++ Makefile	15 Jun 2007 10:31:28 -0000	1.11
+@@ -12,7 +12,7 @@
+ printparts/printparts:
+ 	cd printparts && make
+ 
+-usr.bz2: usr.proto rc.usr printparts/printparts
++usr.bz2: usr.proto rc.usr printparts/printparts lazybox
+ 	@sh mk.usr.sh
+ 
+ boottool/boottool:
+@@ -33,6 +33,10 @@
+ diskimage: fd0
+ 	@echo "*** Extracting bootdisk.img from /dev/fd0"
+ 	dd if=/dev/fd0 of=bootdisk.img bs=1024 count=1440
++
++lazybox:
++	@echo "lazybox is missing"
++	@echo "create lazybox manually in the lazybox directory and move it here"
+ 
+ clean:
+ 	rm -f *~ bootdisk.img usr usr.bz2 root root.s bintoc memory .*~ work/* image
+
+
+
+From nobody at sheep.berlios.de  Fri Jun 15 13:49:06 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Fri, 15 Jun 2007 13:49:06 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK/printparts printparts.c, 1.3,
+	1.4 printparts.h, 1.1, 1.2
+Message-ID: <20070615114906.9370476E05@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK/printparts
+In directory sheep:/tmp/cvs-serv12873
+
+Modified Files:
+	printparts.c printparts.h 
+Log Message:
+partition sizes
+
+
+Index: printparts.c
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/printparts/printparts.c,v
+retrieving revision 1.3
+retrieving revision 1.4
+diff -u -d -r1.3 -r1.4
+--- printparts.c	10 Nov 2006 22:09:20 -0000	1.3
++++ printparts.c	15 Jun 2007 11:46:44 -0000	1.4
+@@ -14,6 +14,9 @@
+ #include <unistd.h>
+ #include <fcntl.h>
+ #include <ibm/partition.h>
++#include <minix/partition.h>
++#include <minix/u64.h>
++#include <sys/ioctl.h>
+ #include "printparts.h"
+ 
+ ind_t ind_table[] = {
+@@ -32,7 +35,15 @@
+     { 0xDB,"CPM"       }, { 0xFF,"BADBLOCKS" }, { 0x00,NULL        }
+ };
+ 
+-int cflag = 0, dflag = 0, eflag = 0, uflag = 0;
++#define UNITS_B     0
++#define UNITS_KB    1
++#define UNITS_MB    2
++#define UNITS_GB    3
++
++static const char* unitstr[4] = { "bytes", "kB", "MB", "GB" };
++static const unsigned int factors[4] = { 0, 1024, 1024*1024, 1024*1024*1024 };
++
++static int cflag = 0, dflag = 0, eflag = 0, uflag = 0, units = UNITS_B;
+ 
+ static void print_ind(unsigned char ind) {
+     int x;
+@@ -80,6 +91,23 @@
+     close(fd);
+ }
+ 
++static void part_size(char *dev, partition_t *partition) {
++    int fd;
++    struct partition entry;
++    u64_t size;
++
++    fd = open(dev, O_RDONLY);
++
++    if (fd > 0 && ioctl(fd, DIOCGETP, &entry) >= 0 ) {
++        size = add64u(entry.size, factors[units]/2);
++        partition->size = div64u(size, factors[units]);
++    } else {
++        partition->size = 0;
++    }
++
++    close(fd);
++}
++
+ static void scan_partitions(char *dev, device_t *device) {
+     int x, y;
+     char pdev[16], sdev[16];
+@@ -90,6 +118,7 @@
+         if (part_exists(pdev, &partitions[x])) {
+             part_type(dev, PART_TABLE_OFF + x * sizeof(struct part_entry),
+                                                             &partitions[x]);
++            part_size(pdev, &partitions[x]);
+             if (partitions[x].type == 0x81 /* MINIX */ ) {
+                 partition_t *partitions = device->subpartitions[x];
+ 
+@@ -99,6 +128,7 @@
+                         part_type(pdev, PART_TABLE_OFF + \
+                                         x * sizeof(struct part_entry), \
+                                         &partitions[y]);
++                        part_size(sdev, &partitions[y]);
+                     }
+                 }
+             }
+@@ -139,6 +169,7 @@
+         if (partitions[x].exists) {
+             printf("    %s) ", pdev);
+             print_ind(partitions[x].type);
++            printf(" (%lu %s)", partitions[x].size, unitstr[units]);
+             printf("\n");
+             if (partitions[x].type == 0x81 /* MINIX */) {
+                 partition_t *partitions = device->subpartitions[x];
+@@ -147,6 +178,7 @@
+                     if (partitions[y].exists) {
+                         printf("        %s) ", sdev);
+                         print_ind(partitions[y].type);
++                        printf(" (%lu %s)", partitions[y].size, unitstr[units]);
+                         printf("\n");
+                     } else {
+                         if (eflag) printf("        %s) n/a\n", sdev);
+@@ -202,7 +234,11 @@
+                     "  -d  include harddisk devices\n"
+                     "  -e  include non-existent devices\n"
+                     "  -h  print this help message\n"
+-                    "  -u  include unknown devices\n");
++                    "  -u  include unknown devices\n"
++                    "  -k  print sizes in kB\n"
++                    "  -m  print sizes in MB\n"
++                    "  -g  print sizes in GB\n");
++
+     _exit(1);
+ }
+ 
+@@ -218,6 +254,9 @@
+                 case 'd':   dflag = 1;      break;
+                 case 'e':   eflag = 1;      break;
+                 case 'u':   uflag = 1;      break;
++                case 'k':   units = UNITS_KB;   break;
++                case 'm':   units = UNITS_MB;   break;
++                case 'g':   units = UNITS_GB;   break;
+                 default:
+                 case 'h':   usage(myname);  break;
+             }
+
+Index: printparts.h
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/printparts/printparts.h,v
+retrieving revision 1.1
+retrieving revision 1.2
+diff -u -d -r1.1 -r1.2
+--- printparts.h	8 Nov 2006 22:15:07 -0000	1.1
++++ printparts.h	15 Jun 2007 11:46:44 -0000	1.2
+@@ -7,6 +7,7 @@
+ typedef struct partition_s {
+     int             exists;
+     unsigned char   type;
++    unsigned long   size;
+ } partition_t;
+ 
+ typedef partition_t partitions_t[nr_partitions];
+
+
+
+From nobody at sheep.berlios.de  Sat Jun 16 00:11:36 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Sat, 16 Jun 2007 00:11:36 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK README,1.8,1.9
+Message-ID: <20070615221136.E1847A0BB2@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv10795
+
+Modified Files:
+	README 
+Log Message:
+update on 7zip/lzma compression
+
+
+Index: README
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/README,v
+retrieving revision 1.8
+retrieving revision 1.9
+diff -u -d -r1.8 -r1.9
+--- README	8 Nov 2006 21:57:55 -0000	1.8
++++ README	15 Jun 2007 22:09:15 -0000	1.9
+@@ -104,6 +104,13 @@
+ than bzip2, this could be usefull, as 7zip is able to compress up to 15%
+ smaller than bzip2 (relative to the compressed bz2 filesize).
+ 
++[update: I read the code of 7zip's LZMA SDK and this might be feasible. There
++is a decoder written in C which is fairly small already and runs on systems
++without (u)int64 support. Downside is that the encoder is written in either
++C++ or C# and no C version is available. By the looks of it, porting to C will
++take quite some time. I could of course encode under Linux or *BSD, but
++that will make mpmports not self-contained anymore.]
++
+ * 7unzipping bootloader
+ 
+ et cetera... :)
+
+
+
+From nobody at sheep.berlios.de  Sun Jun 17 01:13:04 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Sun, 17 Jun 2007 01:13:04 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.4,1.5
+Message-ID: <20070616231304.05A30D8B52@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv30337
+
+Modified Files:
+	start.sh 
+Log Message:
+network settings
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.4
+retrieving revision 1.5
+diff -u -d -r1.4 -r1.5
+--- start.sh	15 Jun 2007 10:26:55 -0000	1.4
++++ start.sh	16 Jun 2007 23:10:40 -0000	1.5
+@@ -114,16 +114,49 @@
+     ethargs="${ethdriver}_args='"`echo "$q" | cut -d '@' -f 2`"'"
+ }
+ 
++dhcp_or_manual() {
++    r=`dialog --no-cancel --stdout \
++              --radiolist \
++              "Network Settings" 0 0 0 \
++              "Manual" "" on \
++              "DHCP" "" off `
++    test "$r" = "Manual" && netdhcp=0 || netdhcp=1
++}
++
++network_settings() {
++    r=`dialog --no-cancel --stdout \
++              --form \
++              "Network Settings" 0 0 0 \
++              "IP Address" 1 0 "$netip"   1 15 15 15 \
++              "Netmask"    2 0 "$netmask" 2 15 15 15 \
++              "Nameserver" 3 0 "$netdns"  3 15 15 15 \
++              "Gateway"    4 0 "$netgw"   4 15 15 15 \
++              "MTU"        5 0 "$netmtu"  5 15  5  5 `
++    netip=`  echo "$r" | head -1`
++    netmask=`echo "$r" | head -2 | tail -1`
++    netdns=` echo "$r" | head -3 | tail -1`
++    netgw=`  echo "$r" | head -4 | tail -1`
++    netmtu=` echo "$r" | head -5 | tail -1`
++}
++
+ # -----------------------------------------------------------------------------
+ 
+ ethdriver="none"
+ ethargs=""
++netdhcp=0
++netip=192.168.0.
++netmask=255.255.255.0
++netdns=192.168.0.1
++netgw=192.168.0.1
++netmtu=1500
+ 
+ welcome
+ set_keymap
+ time_and_date
+ at_or_bios_wini
+ ethernet_chip
++dhcp_or_manual
++test $netdhcp -eq 0 && network_settings
+ 
+ # -----------------------------------------------------------------------------
+ 
+
+
+
+From nobody at sheep.berlios.de  Sun Jun 17 01:20:23 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Sun, 17 Jun 2007 01:20:23 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.5,1.6
+Message-ID: <20070616232023.22561CBF7D@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv6900
+
+Modified Files:
+	start.sh 
+Log Message:
+remember name of network card
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.5
+retrieving revision 1.6
+diff -u -d -r1.5 -r1.6
+--- start.sh	16 Jun 2007 23:10:40 -0000	1.5
++++ start.sh	16 Jun 2007 23:18:00 -0000	1.6
+@@ -92,24 +92,25 @@
+     r=`dialog --no-cancel --stdout \
+               --radiolist \
+               "Please select your ethernet card" 0 0 0 \
+-              "0" "No networking" off \
+-              "1" "Intel Pro/100" off \
+-              "2" "3Com 501 / 3Com 509 based card" off \
+-              "3" "Realtek 8139 based card" off \
+-              "4" "Realtek 8029 based card (use by Qemu)" off \
+-              "5" "NE2000, 3Com 503 or WD based card (used by Bochs)" off \
+-              "6" "AMD LANCE (used by VMware)" on `
++              "No networking" "" off \
++              "Intel Pro/100" "" off \
++              "3Com 501 / 3Com 509 based card" "" off \
++              "Realtek 8139 based card" "" off \
++              "Realtek 8029 based card (use by Qemu)" "" off \
++              "NE2000, 3Com 503 or WD based card (used by Bochs)" "" off \
++              "AMD LANCE (used by VMware)" "" on `
+ 
+     case $r in
+-        1)  q="fxp@" ;;
+-        2)  q="dpeth@" ;;
+-        3)  q="rtl8139@" ;;
+-        4)  q="dp8390 at DPETH0=pci" ;;
+-        5)  q="dp8390 at DPETH0=240:9" ;;
+-        6)  q="lance@" ;;
+-        *)  q="none@" ;;
++        Intel*) q="fxp@" ;;
++        3Com**) q="dpeth@" ;;
++        *8139*) q="rtl8139@" ;;
++        *8029*) q="dp8390 at DPETH0=pci" ;;
++        NE200*) q="dp8390 at DPETH0=240:9" ;;
++        AMD*L*) q="lance@" ;;
++        *)      q="none@" ;;
+     esac
+ 
++    ethname="$r"
+     ethdriver=`echo "$q" | cut -d '@' -f 1`
+     ethargs="${ethdriver}_args='"`echo "$q" | cut -d '@' -f 2`"'"
+ }
+@@ -141,6 +142,7 @@
+ 
+ # -----------------------------------------------------------------------------
+ 
++ethname="none"
+ ethdriver="none"
+ ethargs=""
+ netdhcp=0
+
+
+
+From nobody at sheep.berlios.de  Sun Jun 17 01:23:12 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Sun, 17 Jun 2007 01:23:12 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.6,1.7
+Message-ID: <20070616232312.7C600F26CF@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv8211
+
+Modified Files:
+	start.sh 
+Log Message:
+no networking is not an option for a network-install-based distro
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.6
+retrieving revision 1.7
+diff -u -d -r1.6 -r1.7
+--- start.sh	16 Jun 2007 23:18:00 -0000	1.6
++++ start.sh	16 Jun 2007 23:20:50 -0000	1.7
+@@ -92,7 +92,6 @@
+     r=`dialog --no-cancel --stdout \
+               --radiolist \
+               "Please select your ethernet card" 0 0 0 \
+-              "No networking" "" off \
+               "Intel Pro/100" "" off \
+               "3Com 501 / 3Com 509 based card" "" off \
+               "Realtek 8139 based card" "" off \
+@@ -107,7 +106,8 @@
+         *8029*) q="dp8390 at DPETH0=pci" ;;
+         NE200*) q="dp8390 at DPETH0=240:9" ;;
+         AMD*L*) q="lance@" ;;
+-        *)      q="none@" ;;
++        *)      echo "This should not be possible. There's a bug in $0."
++                exit 2 ;;
+     esac
+ 
+     ethname="$r"
+
+
+
+From nobody at sheep.berlios.de  Sun Jun 17 21:58:55 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Sun, 17 Jun 2007 21:58:55 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK rc.usr,1.4,1.5 usr.proto,1.7,1.8
+Message-ID: <20070617195855.B5098816B4@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv29311
+
+Modified Files:
+	rc.usr usr.proto 
+Log Message:
+add /etc/services
+
+
+Index: rc.usr
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/rc.usr,v
+retrieving revision 1.4
+retrieving revision 1.5
+diff -u -d -r1.4 -r1.5
+--- rc.usr	10 Nov 2006 20:12:31 -0000	1.4
++++ rc.usr	17 Jun 2007 19:56:33 -0000	1.5
+@@ -45,7 +45,7 @@
+ ln -s /usr/tmp /tmp
+ rm -rf /dev
+ cd /usr/etc
+-cp termcap passwd group /etc
++cp termcap passwd group services /etc
+ ln -s /usr/bin/lazybox /bin/pwd
+ ln -s /usr/sbin /sbin
+ mkdir /mnt
+@@ -65,6 +65,7 @@
+ up "" /sbin/is -period 5HZ
+ 
+ echo -n "Drivers:"
++up "-n" /sbin/random -dev /dev/random -period 3HZ
+ up "-n" /sbin/cmos -dev /dev/cmos -period 5HZ
+ up "" /sbin/pci
+ 
+
+Index: usr.proto
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/usr.proto,v
+retrieving revision 1.7
+retrieving revision 1.8
+diff -u -d -r1.7 -r1.8
+--- usr.proto	15 Jun 2007 09:16:36 -0000	1.7
++++ usr.proto	17 Jun 2007 19:56:33 -0000	1.8
+@@ -24,6 +24,7 @@
+         passwd ---644 0 0 passwd
+         group ---644 0 0 group
+         termcap ---644 0 0 termcap
++        services ---644 0 0 /etc/services
+ 	$
+ 	sbin d--755 0 0
+         at_wini ---755 0 0 /sbin/at_wini
+
+
+
+From nobody at sheep.berlios.de  Sun Jun 17 22:02:42 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Sun, 17 Jun 2007 22:02:42 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK rc.usr,1.5,1.6
+Message-ID: <20070617200242.B19D8E1E6B@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv29500
+
+Modified Files:
+	rc.usr 
+Log Message:
+revert /etc/services addition
+
+
+Index: rc.usr
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/rc.usr,v
+retrieving revision 1.5
+retrieving revision 1.6
+diff -u -d -r1.5 -r1.6
+--- rc.usr	17 Jun 2007 19:56:33 -0000	1.5
++++ rc.usr	17 Jun 2007 20:00:20 -0000	1.6
+@@ -45,7 +45,7 @@
+ ln -s /usr/tmp /tmp
+ rm -rf /dev
+ cd /usr/etc
+-cp termcap passwd group services /etc
++cp termcap passwd group /etc
+ ln -s /usr/bin/lazybox /bin/pwd
+ ln -s /usr/sbin /sbin
+ mkdir /mnt
+@@ -65,7 +65,6 @@
+ up "" /sbin/is -period 5HZ
+ 
+ echo -n "Drivers:"
+-up "-n" /sbin/random -dev /dev/random -period 3HZ
+ up "-n" /sbin/cmos -dev /dev/cmos -period 5HZ
+ up "" /sbin/pci
+ 
+
+
+
+From nobody at sheep.berlios.de  Sun Jun 17 22:03:18 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Sun, 17 Jun 2007 22:03:18 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK rc.usr,1.6,1.7
+Message-ID: <20070617200318.39EE3E33CA@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv29546
+
+Modified Files:
+	rc.usr 
+Log Message:
+move /usr/etc/services to /etc/services
+
+
+Index: rc.usr
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/rc.usr,v
+retrieving revision 1.6
+retrieving revision 1.7
+diff -u -d -r1.6 -r1.7
+--- rc.usr	17 Jun 2007 20:00:20 -0000	1.6
++++ rc.usr	17 Jun 2007 20:00:56 -0000	1.7
+@@ -45,7 +45,7 @@
+ ln -s /usr/tmp /tmp
+ rm -rf /dev
+ cd /usr/etc
+-cp termcap passwd group /etc
++cp termcap passwd group services /etc
+ ln -s /usr/bin/lazybox /bin/pwd
+ ln -s /usr/sbin /sbin
+ mkdir /mnt
+
+
+
+From nobody at sheep.berlios.de  Sun Jun 17 22:04:02 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Sun, 17 Jun 2007 22:04:02 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK rc.usr,1.7,1.8
+Message-ID: <20070617200402.C24DFE33CA@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv29570
+
+Modified Files:
+	rc.usr 
+Log Message:
+start random service
+
+
+Index: rc.usr
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/rc.usr,v
+retrieving revision 1.7
+retrieving revision 1.8
+diff -u -d -r1.7 -r1.8
+--- rc.usr	17 Jun 2007 20:00:56 -0000	1.7
++++ rc.usr	17 Jun 2007 20:01:40 -0000	1.8
+@@ -65,6 +65,7 @@
+ up "" /sbin/is -period 5HZ
+ 
+ echo -n "Drivers:"
++up "-n" /sbin/random -dev /dev/random -period 3HZ
+ up "-n" /sbin/cmos -dev /dev/cmos -period 5HZ
+ up "" /sbin/pci
+ 
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 00:09:51 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 00:09:51 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK rc.usr,1.8,1.9
+Message-ID: <20070617220951.89F20F54EB@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv7056
+
+Modified Files:
+	rc.usr 
+Log Message:
+mkdir /usr/{adm,run} and make all directories with one mkdir command
+
+
+Index: rc.usr
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/rc.usr,v
+retrieving revision 1.8
+retrieving revision 1.9
+diff -u -d -r1.8 -r1.9
+--- rc.usr	17 Jun 2007 20:01:40 -0000	1.8
++++ rc.usr	17 Jun 2007 22:07:28 -0000	1.9
+@@ -41,14 +41,13 @@
+ echo -n "Reordering filesystem: "
+ rm -f /usr.bz2
+ cp /usr/bin/sh /bin/sh      # overwrite bintool
+-mkdir /usr/tmp
++mkdir /usr/tmp /usr/adm /usr/run /mnt
+ ln -s /usr/tmp /tmp
+ rm -rf /dev
+ cd /usr/etc
+ cp termcap passwd group services /etc
+ ln -s /usr/bin/lazybox /bin/pwd
+ ln -s /usr/sbin /sbin
+-mkdir /mnt
+ ok
+ 
+ echo -n "Populating /dev: "
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 00:56:54 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 00:56:54 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK TODO,NONE,1.1
+Message-ID: <20070617225654.699CAF13BA@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv11213
+
+Added Files:
+	TODO 
+Log Message:
+start todo list
+
+
+
+--- NEW FILE: TODO ---
+- instead of copying system tools unmodified from running system to usr-fs,
+  copy them to work/ first and set stacksizes ourselves.
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 00:57:47 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 00:57:47 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK mk.usr.sh,1.3,1.4
+Message-ID: <20070617225747.6E2A9F13BA@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv11372
+
+Modified Files:
+	mk.usr.sh 
+Log Message:
+make sure lazybox stacksize is not too big
+
+
+Index: mk.usr.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/mk.usr.sh,v
+retrieving revision 1.3
+retrieving revision 1.4
+diff -u -d -r1.3 -r1.4
+--- mk.usr.sh	30 Oct 2006 12:17:50 -0000	1.3
++++ mk.usr.sh	17 Jun 2007 22:55:23 -0000	1.4
+@@ -2,6 +2,7 @@
+ 
+ set -e
+ 
++lazyboxstack=524288
+ mkfs=/usr/bin/mkfs
+ work=`pwd`/work
+ usr=usr
+@@ -12,6 +13,9 @@
+ 
+ echo "*** Deleting old $usr and/or $usr.bz2"
+ rm -f $usr $usr.bz2
++
++echo "*** Setting lazybox stack to $lazyboxstack"
++chmem =$lazyboxstack lazybox
+ 
+ echo "*** Creating $usr filesystem according to $usrproto"
+ $mkfs -B 2048 $usr $usrproto
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 00:58:40 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 00:58:40 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.7,1.8
+Message-ID: <20070617225840.163DEF4C95@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv12055
+
+Modified Files:
+	start.sh 
+Log Message:
+bringing up network
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.7
+retrieving revision 1.8
+diff -u -d -r1.7 -r1.8
+--- start.sh	16 Jun 2007 23:20:50 -0000	1.7
++++ start.sh	17 Jun 2007 22:56:16 -0000	1.8
+@@ -88,6 +88,8 @@
+ 
+ # -----------------------------------------------------------------------------
+ 
++allethdrivers="fxp dpeth rtl8139 dp8390 lance"
++
+ ethernet_chip() {
+     r=`dialog --no-cancel --stdout \
+               --radiolist \
+@@ -105,14 +107,15 @@
+         *8139*) q="rtl8139@" ;;
+         *8029*) q="dp8390 at DPETH0=pci" ;;
+         NE200*) q="dp8390 at DPETH0=240:9" ;;
+-        AMD*L*) q="lance@" ;;
++        AMD*L*) q="lance at LANCE0=on" ;;
+         *)      echo "This should not be possible. There's a bug in $0."
+                 exit 2 ;;
+     esac
+ 
+     ethname="$r"
+     ethdriver=`echo "$q" | cut -d '@' -f 1`
+-    ethargs="${ethdriver}_args='"`echo "$q" | cut -d '@' -f 2`"'"
++    ethjustargs=`echo "$q" | cut -d '@' -f 2`
++    ethargs="${ethdriver}_args='$ethjustargs'"
+ }
+ 
+ dhcp_or_manual() {
+@@ -140,25 +143,64 @@
+     netmtu=` echo "$r" | head -5 | tail -1`
+ }
+ 
++kill_service_by_fullname() {
++    tmp=`ps -ef | grep $1 | grep -v grep`
++    pid=`echo $tmp | cut -d ' ' -f 4`
++    test -n "$pid" && service down $pid
++}
++
++network_restart() {
++    echo "eth0 $ethdriver 0 { default; };" > /etc/inet.conf
++    echo "127.0.0.1 localhost" >  /etc/hosts
++    echo "$netdns %nameserver" >> /etc/hosts
++    echo "minix-install" > /etc/hostname.file
++
++    pid=`cat /usr/run/nonamed.pid` 2>/dev/null
++    test -n "$pid" && kill $pid
++    kill_service_by_fullname /sbin/inet
++
++    for i in $allethdrivers ; do
++        kill_service_by_fullname /sbin/$i
++    done
++
++    echo "Bringing up network..."
++
++    test -n "$ethjustargs" && args="-args $ethargs"
++    service up /sbin/$ethdriver $args -period 5HZ
++    service up /sbin/inet
++    ifconfig -I /dev/ip -h $netip -n $netmask -m $netmtu
++    add_route -I /dev/ip -g $netgw
++    nonamed -L &
++}
++
+ # -----------------------------------------------------------------------------
+ 
+ ethname="none"
+ ethdriver="none"
+ ethargs=""
++ethjustargs=""
+ netdhcp=0
+ netip=192.168.0.
+ netmask=255.255.255.0
+ netdns=192.168.0.1
+ netgw=192.168.0.1
+ netmtu=1500
++netup=no
+ 
+ welcome
+ set_keymap
+ time_and_date
+ at_or_bios_wini
+-ethernet_chip
+-dhcp_or_manual
+-test $netdhcp -eq 0 && network_settings
++
++while test "$netup" = "no" ; do
++    ethernet_chip
++    dhcp_or_manual
++    test $netdhcp -eq 0 && network_settings
++
++    network_restart
++
++    ping $netdns >/dev/null 2>&1 && netup=yes
++done
+ 
+ # -----------------------------------------------------------------------------
+ 
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 01:03:27 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 01:03:27 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.8,1.9
+Message-ID: <20070617230327.1AE0AF4C95@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv18048
+
+Modified Files:
+	start.sh 
+Log Message:
+'typo' ;)
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.8
+retrieving revision 1.9
+diff -u -d -r1.8 -r1.9
+--- start.sh	17 Jun 2007 22:56:16 -0000	1.8
++++ start.sh	17 Jun 2007 23:01:04 -0000	1.9
+@@ -165,7 +165,7 @@
+ 
+     echo "Bringing up network..."
+ 
+-    test -n "$ethjustargs" && args="-args $ethargs"
++    test -n "$ethjustargs" && args="-args $ethjustargs"
+     service up /sbin/$ethdriver $args -period 5HZ
+     service up /sbin/inet
+     ifconfig -I /dev/ip -h $netip -n $netmask -m $netmtu
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 01:04:46 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 01:04:46 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK rc.usr,1.9,1.10
+Message-ID: <20070617230446.DC6DFF4C95@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv21005
+
+Modified Files:
+	rc.usr 
+Log Message:
+it's not bintool but boottool
+
+
+Index: rc.usr
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/rc.usr,v
+retrieving revision 1.9
+retrieving revision 1.10
+diff -u -d -r1.9 -r1.10
+--- rc.usr	17 Jun 2007 22:07:28 -0000	1.9
++++ rc.usr	17 Jun 2007 23:02:24 -0000	1.10
+@@ -40,7 +40,7 @@
+ 
+ echo -n "Reordering filesystem: "
+ rm -f /usr.bz2
+-cp /usr/bin/sh /bin/sh      # overwrite bintool
++cp /usr/bin/sh /bin/sh      # overwrite boottool
+ mkdir /usr/tmp /usr/adm /usr/run /mnt
+ ln -s /usr/tmp /tmp
+ rm -rf /dev
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 13:16:10 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 13:16:10 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.9,1.10
+Message-ID: <20070618111610.ED6BAF50C4@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv13843
+
+Modified Files:
+	start.sh 
+Log Message:
+kill message to stderr
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.9
+retrieving revision 1.10
+diff -u -d -r1.9 -r1.10
+--- start.sh	17 Jun 2007 23:01:04 -0000	1.9
++++ start.sh	18 Jun 2007 11:13:45 -0000	1.10
+@@ -155,7 +155,7 @@
+     echo "$netdns %nameserver" >> /etc/hosts
+     echo "minix-install" > /etc/hostname.file
+ 
+-    pid=`cat /usr/run/nonamed.pid` 2>/dev/null
++    pid=`cat /usr/run/nonamed.pid 2>/dev/null`
+     test -n "$pid" && kill $pid
+     kill_service_by_fullname /sbin/inet
+ 
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 13:18:24 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 13:18:24 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.10,1.11
+Message-ID: <20070618111824.53A3D2D211@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv17506
+
+Modified Files:
+	start.sh 
+Log Message:
+remove DEBUG stuff
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.10
+retrieving revision 1.11
+diff -u -d -r1.10 -r1.11
+--- start.sh	18 Jun 2007 11:13:45 -0000	1.10
++++ start.sh	18 Jun 2007 11:16:01 -0000	1.11
+@@ -2,7 +2,6 @@
+ 
+ keymaps=/usr/lib/keymaps
+ 
+-#DEBUG="echo DEBUG:"
+ VERSION="2007.0 (beta)"
+ TERM=minix-color
+ eval DIALOGOPTS=\'--backtitle "\"               The MPMPORTS Minix Distribution, $VERSION\""\'
+@@ -83,7 +82,7 @@
+               --radiolist "Please select an I/O driver" 0 0 0 \
+                           "at_wini" "AT/IDE Driver" on \
+                           "bios_wini" "BIOS Driver" off `
+-    $DEBUG service up /sbin/$r -dev /dev/c0d0
++    service up /sbin/$r -dev /dev/c0d0
+ }
+ 
+ # -----------------------------------------------------------------------------
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 13:20:54 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 13:20:54 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.11,1.12
+Message-ID: <20070618112054.D4A8989B84@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv25557
+
+Modified Files:
+	start.sh 
+Log Message:
+reverse order of Done and Refresh (date&time)
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.11
+retrieving revision 1.12
+diff -u -d -r1.11 -r1.12
+--- start.sh	18 Jun 2007 11:16:01 -0000	1.11
++++ start.sh	18 Jun 2007 11:18:31 -0000	1.12
+@@ -64,10 +64,10 @@
+     while test "$r" != "Done" ; do
+         DATE=`date`
+         r=`dialog --no-cancel --stdout \
+-                  --menu "$DATE" 7 36 0 "Refresh" ""  \
++                  --menu "$DATE" 7 36 0 "Done" ""  \
+                                         "Set date" "" \
+                                         "Set time" "" \
+-                                        "Done" ""`
++                                        "Refresh" ""`
+         case "$r" in
+             *date) set_date ;;
+             *time) set_time ;;
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 13:47:37 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 13:47:37 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK Makefile,1.11,1.12
+Message-ID: <20070618114737.E3287F34DF@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv3518
+
+Modified Files:
+	Makefile 
+Log Message:
+usr fs depends on start.sh
+
+
+Index: Makefile
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/Makefile,v
+retrieving revision 1.11
+retrieving revision 1.12
+diff -u -d -r1.11 -r1.12
+--- Makefile	15 Jun 2007 10:31:28 -0000	1.11
++++ Makefile	18 Jun 2007 11:45:15 -0000	1.12
+@@ -12,7 +12,7 @@
+ printparts/printparts:
+ 	cd printparts && make
+ 
+-usr.bz2: usr.proto rc.usr printparts/printparts lazybox
++usr.bz2: usr.proto rc.usr printparts/printparts lazybox start.sh
+ 	@sh mk.usr.sh
+ 
+ boottool/boottool:
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 18:38:50 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 18:38:50 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.12,1.13
+Message-ID: <20070618163850.807EAF37F0@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv13742
+
+Modified Files:
+	start.sh 
+Log Message:
+dialogs during network init
+extend welcome screen
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.12
+retrieving revision 1.13
+diff -u -d -r1.12 -r1.13
+--- start.sh	18 Jun 2007 11:18:31 -0000	1.12
++++ start.sh	18 Jun 2007 16:36:27 -0000	1.13
+@@ -9,12 +9,29 @@
+ 
+ # -----------------------------------------------------------------------------
+ 
+-welcome() {
+-    dialog --begin 3 1 --msgbox "
+-Welcome to the MPMPORTS Minix distribution, $VERSION
++WELCOME="Welcome to the MPMPORTS Minix distribution, $VERSION"
+ 
+-Not much to say here at the moment, so let's continue with the installation.
+-" 20 76
++welcome() {
++    r=""
++    while test "$r" != "Install" ; do
++        r=`dialog \
++                --stdout \
++                --begin 3 1 --infobox "$WELCOME" 7 76 \
++                --and-widget \
++                --no-cancel --begin 12 22 \
++                --menu "What do you want to do?" 11 36 4 \
++                "Install" "Install to harddisk" \
++                "About" "About MPMPORTS" \
++                "License" "View license" \
++                "Exit" "Exit to shell" `
++        case "$r" in
++            Install)    : ;;
++            About)      : ;;
++            License)    : ;;
++            Exit)       exit 0 ;;
++            *)          echo blerk ;;
++        esac
++    done
+ }
+ 
+ # -----------------------------------------------------------------------------
+@@ -149,6 +166,9 @@
+ }
+ 
+ network_restart() {
++    dialog --infobox "Preparing..." 3 40
++    sleep 1
++
+     echo "eth0 $ethdriver 0 { default; };" > /etc/inet.conf
+     echo "127.0.0.1 localhost" >  /etc/hosts
+     echo "$netdns %nameserver" >> /etc/hosts
+@@ -162,7 +182,8 @@
+         kill_service_by_fullname /sbin/$i
+     done
+ 
+-    echo "Bringing up network..."
++    dialog --infobox "Bringing up networking..." 3 40
++    sleep 1
+ 
+     test -n "$ethjustargs" && args="-args $ethjustargs"
+     service up /sbin/$ethdriver $args -period 5HZ
+@@ -199,6 +220,12 @@
+     network_restart
+ 
+     ping $netdns >/dev/null 2>&1 && netup=yes
++
++    if test "$netup" = "no" ; then
++        dialog --ok-label "Retry" --msgbox "Cannot bring up networking!" 5 40
++    else
++        dialog --ok-label "Continue" --msgbox "Networking OK" 5 40
++    fi
+ done
+ 
+ # -----------------------------------------------------------------------------
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 18:47:52 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 18:47:52 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK rc.usr,1.10,1.11
+Message-ID: <20070618164752.6C66DF4297@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv25279
+
+Modified Files:
+	rc.usr 
+Log Message:
+run start.sh before going to sh
+
+
+Index: rc.usr
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/rc.usr,v
+retrieving revision 1.10
+retrieving revision 1.11
+diff -u -d -r1.10 -r1.11
+--- rc.usr	17 Jun 2007 23:02:24 -0000	1.10
++++ rc.usr	18 Jun 2007 16:45:29 -0000	1.11
+@@ -70,8 +70,10 @@
+ 
+ readclock
+ 
+-echo "Press ENTER to start installation"
++echo "Press ENTER to continue"
+ echo -n ":"
+ intr read ans
++
++intr /usr/bin/start.sh
+ 
+ exec intr /usr/bin/sh -i
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 19:41:12 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 19:41:12 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.13,1.14
+Message-ID: <20070618174112.0F97EF27E2@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv19854
+
+Modified Files:
+	start.sh 
+Log Message:
+update welcome message
+remove leftover debug statement
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.13
+retrieving revision 1.14
+diff -u -d -r1.13 -r1.14
+--- start.sh	18 Jun 2007 16:36:27 -0000	1.13
++++ start.sh	18 Jun 2007 17:38:49 -0000	1.14
+@@ -9,27 +9,31 @@
+ 
+ # -----------------------------------------------------------------------------
+ 
+-WELCOME="Welcome to the MPMPORTS Minix distribution, $VERSION"
++WELCOME="        Welcome to the MPMPORTS Minix distribution, $VERSION
++
++     MPMPORTS Framework Copyright (C) 2006-2007 by Ivo van Poorten
++   Minix 3.1.2a Copyright (C) 1986-2006 Vrije Universiteit, Amsterdam
++The Vrije Universiteit DOES NOT actively endorse, support or affiliates
++                 itself with this project in ANY WAY
++"
+ 
+ welcome() {
+     r=""
+     while test "$r" != "Install" ; do
+         r=`dialog \
+                 --stdout \
+-                --begin 3 1 --infobox "$WELCOME" 7 76 \
++                --begin 3 1 --infobox "$WELCOME" 8 76 \
+                 --and-widget \
+-                --no-cancel --begin 12 22 \
+-                --menu "What do you want to do?" 11 36 4 \
++                --no-cancel --begin 13 22 \
++                --menu "What do you want to do?" 10 36 3 \
+                 "Install" "Install to harddisk" \
+                 "About" "About MPMPORTS" \
+-                "License" "View license" \
+                 "Exit" "Exit to shell" `
+         case "$r" in
+             Install)    : ;;
+             About)      : ;;
+             License)    : ;;
+             Exit)       exit 0 ;;
+-            *)          echo blerk ;;
+         esac
+     done
+ }
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 21:25:22 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 21:25:22 +0200 (CEST)
+Subject: [Mpm-cvslog] lazybox LICENSE,1.1,1.2
+Message-ID: <20070618192522.B89BFF11EF@mail.berlios.de>
+
+Update of /cvsroot/mpm/lazybox
+In directory sheep:/tmp/cvs-serv28811
+
+Modified Files:
+	LICENSE 
+Log Message:
+regents-->copyright holders
+
+
+Index: LICENSE
+===================================================================
+RCS file: /cvsroot/mpm/lazybox/LICENSE,v
+retrieving revision 1.1
+retrieving revision 1.2
+diff -u -d -r1.1 -r1.2
+--- LICENSE	3 Oct 2006 09:31:31 -0000	1.1
++++ LICENSE	18 Jun 2007 19:22:59 -0000	1.2
+@@ -12,7 +12,7 @@
+     * My name may NOT be used to endorse or promote products derived from
+       this software without specific prior written permission.
+ 
+-THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ``AS IS'' AND ANY
+ EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 21:26:16 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 21:26:16 +0200 (CEST)
+Subject: [Mpm-cvslog] pmcolorcc LICENSE,1.1,1.2
+Message-ID: <20070618192616.B9207F2CA6@mail.berlios.de>
+
+Update of /cvsroot/mpm/pmcolorcc
+In directory sheep:/tmp/cvs-serv28879
+
+Modified Files:
+	LICENSE 
+Log Message:
+regents-->copyright holder(s)
+
+
+Index: LICENSE
+===================================================================
+RCS file: /cvsroot/mpm/pmcolorcc/LICENSE,v
+retrieving revision 1.1
+retrieving revision 1.2
+diff -u -d -r1.1 -r1.2
+--- LICENSE	7 Oct 2006 18:07:46 -0000	1.1
++++ LICENSE	18 Jun 2007 19:23:54 -0000	1.2
+@@ -12,7 +12,7 @@
+     * My name may NOT be used to endorse or promote products derived from
+       this software without specific prior written permission.
+ 
+-THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+ EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 21:40:25 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 21:40:25 +0200 (CEST)
+Subject: [Mpm-cvslog] pmcolorcc LICENSE,1.2,1.3
+Message-ID: <20070618194025.17B3CF1DDD@mail.berlios.de>
+
+Update of /cvsroot/mpm/pmcolorcc
+In directory sheep:/tmp/cvs-serv29834
+
+Modified Files:
+	LICENSE 
+Log Message:
+more regents-->copyright holder(s)
+
+
+Index: LICENSE
+===================================================================
+RCS file: /cvsroot/mpm/pmcolorcc/LICENSE,v
+retrieving revision 1.2
+retrieving revision 1.3
+diff -u -d -r1.2 -r1.3
+--- LICENSE	18 Jun 2007 19:23:54 -0000	1.2
++++ LICENSE	18 Jun 2007 19:38:01 -0000	1.3
+@@ -15,7 +15,7 @@
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+ EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+-DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 21:40:51 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 21:40:51 +0200 (CEST)
+Subject: [Mpm-cvslog] lazybox LICENSE,1.2,1.3
+Message-ID: <20070618194051.E67AFF1DDD@mail.berlios.de>
+
+Update of /cvsroot/mpm/lazybox
+In directory sheep:/tmp/cvs-serv29890
+
+Modified Files:
+	LICENSE 
+Log Message:
+more regents-->copyright holder(s)
+
+
+Index: LICENSE
+===================================================================
+RCS file: /cvsroot/mpm/lazybox/LICENSE,v
+retrieving revision 1.2
+retrieving revision 1.3
+diff -u -d -r1.2 -r1.3
+--- LICENSE	18 Jun 2007 19:22:59 -0000	1.2
++++ LICENSE	18 Jun 2007 19:38:29 -0000	1.3
+@@ -15,7 +15,7 @@
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ``AS IS'' AND ANY
+ EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+-DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 21:44:44 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 21:44:44 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK about.txt, NONE, 1.1 start.sh, 1.14,
+	1.15 usr.proto, 1.8, 1.9
+Message-ID: <20070618194444.41001F3D7E@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv30196
+
+Modified Files:
+	start.sh usr.proto 
+Added Files:
+	about.txt 
+Log Message:
+first draft of about.txt
+
+
+--- NEW FILE: about.txt ---
+MPMPORTS Minix distribution, 2007.0 (beta)
+
+MPMPORTS Framework Copyright (C) 2006-2007 by Ivo van Poorten
+Minix 3.1.2a Copyright (C) 1986-2006 Vrije Universiteit, Amsterdam
+The Vrije Universiteit DOES NOT actively endorse, support or affiliates
+itself with this project in ANY WAY
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * My name may NOT be used to endorse or promote products derived from
+    this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ``AS IS'' AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.14
+retrieving revision 1.15
+diff -u -d -r1.14 -r1.15
+--- start.sh	18 Jun 2007 17:38:49 -0000	1.14
++++ start.sh	18 Jun 2007 19:42:21 -0000	1.15
+@@ -16,6 +16,7 @@
+ The Vrije Universiteit DOES NOT actively endorse, support or affiliates
+                  itself with this project in ANY WAY
+ "
++ABOUT="/usr/lib/about.txt"
+ 
+ welcome() {
+     r=""
+@@ -31,8 +32,9 @@
+                 "Exit" "Exit to shell" `
+         case "$r" in
+             Install)    : ;;
+-            About)      : ;;
+-            License)    : ;;
++            About)
++                dialog --no-cancel --begin 3 1 --textbox $ABOUT 20 76 
++                ;;
+             Exit)       exit 0 ;;
+         esac
+     done
+
+Index: usr.proto
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/usr.proto,v
+retrieving revision 1.8
+retrieving revision 1.9
+diff -u -d -r1.8 -r1.9
+--- usr.proto	17 Jun 2007 19:56:33 -0000	1.8
++++ usr.proto	18 Jun 2007 19:42:21 -0000	1.9
+@@ -57,5 +57,6 @@
+             uk.map ---644 0 0 /usr/lib/keymaps/uk.map
+             us-swap.map ---644 0 0 /usr/lib/keymaps/us-swap.map
+         $
++        about.txt ---644 0 0 about.txt
+     $
+ $
+
+
+
+From nobody at sheep.berlios.de  Mon Jun 18 21:45:34 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Mon, 18 Jun 2007 21:45:34 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK Makefile,1.12,1.13
+Message-ID: <20070618194534.01BAFF36A6@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv30231
+
+Modified Files:
+	Makefile 
+Log Message:
+depend on about.txt
+
+
+Index: Makefile
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/Makefile,v
+retrieving revision 1.12
+retrieving revision 1.13
+diff -u -d -r1.12 -r1.13
+--- Makefile	18 Jun 2007 11:45:15 -0000	1.12
++++ Makefile	18 Jun 2007 19:43:11 -0000	1.13
+@@ -12,7 +12,7 @@
+ printparts/printparts:
+ 	cd printparts && make
+ 
+-usr.bz2: usr.proto rc.usr printparts/printparts lazybox start.sh
++usr.bz2: usr.proto rc.usr printparts/printparts lazybox start.sh about.txt
+ 	@sh mk.usr.sh
+ 
+ boottool/boottool:
+
+
+
+From nobody at sheep.berlios.de  Tue Jun 19 00:09:43 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Tue, 19 Jun 2007 00:09:43 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK about.txt,1.1,1.2
+Message-ID: <20070618220943.5EC12F1F0A@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv12317
+
+Modified Files:
+	about.txt 
+Log Message:
+spelling
+
+
+Index: about.txt
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/about.txt,v
+retrieving revision 1.1
+retrieving revision 1.2
+diff -u -d -r1.1 -r1.2
+--- about.txt	18 Jun 2007 19:42:21 -0000	1.1
++++ about.txt	18 Jun 2007 22:07:20 -0000	1.2
+@@ -1,7 +1,7 @@
+ MPMPORTS Minix distribution, 2007.0 (beta)
+ 
+ MPMPORTS Framework Copyright (C) 2006-2007 by Ivo van Poorten
+-Minix 3.1.2a Copyright (C) 1986-2006 Vrije Universiteit, Amsterdam
++MINIX 3.1.2a Copyright (C) 1986-2006 Vrije Universiteit, Amsterdam
+ The Vrije Universiteit DOES NOT actively endorse, support or affiliates
+ itself with this project in ANY WAY
+ 
+
+
+
+From nobody at sheep.berlios.de  Tue Jun 19 13:07:47 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Tue, 19 Jun 2007 13:07:47 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.15,1.16
+Message-ID: <20070619110747.7B342D7232@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv5738
+
+Modified Files:
+	start.sh 
+Log Message:
+protect all dialogs against pressing ESC (dialog should have an option to
+disable ESC)
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.15
+retrieving revision 1.16
+diff -u -d -r1.15 -r1.16
+--- start.sh	18 Jun 2007 19:42:21 -0000	1.15
++++ start.sh	19 Jun 2007 11:05:23 -0000	1.16
+@@ -49,10 +49,13 @@
+         si=`basename $i .map`
+         items="$items $si \"\" off"
+     done
++    r=""
++    while test -z "$r" ; do
+     r=`eval dialog --no-cancel --stdout \
+               --radiolist \"Please select a keymap\" 0 0 0 \
+                           us-std \"\" on \
+                           $items`
++    done
+     loadkeys $keymaps/$r.map
+ }
+ 
+@@ -62,8 +65,11 @@
+     Y=`date +%Y`
+     M=`date +%m`
+     D=`date +%d`
++    r=""
++    while test -z "$r" ; do
+     r=`dialog --no-cancel --stdout \
+               --calendar "Please specify the current date" 0 0 $D $M $Y`
++    done
+     D=`echo $r | cut -d '/' -f 1`
+     M=`echo $r | cut -d '/' -f 2`
+     Y=`echo $r | cut -d '/' -f 3 | cut -c 3-4`
+@@ -74,8 +80,11 @@
+     h=`date +%H`
+     m=`date +%M`
+     s=`date +%S`
++    r=""
++    while test -z "$r" ; do
+     r=`dialog --no-cancel --stdout \
+               --timebox "Please specify the current time" 0 0 $h $m $s`
++    done
+     h=`echo $r | cut -d ':' -f 1`
+     m=`echo $r | cut -d ':' -f 2`
+     s=`echo $r | cut -d ':' -f 3`
+@@ -101,10 +110,13 @@
+ # -----------------------------------------------------------------------------
+ 
+ at_or_bios_wini() {
++    r=""
++    while test -z "$r" ; do
+     r=`dialog --no-cancel --stdout \
+               --radiolist "Please select an I/O driver" 0 0 0 \
+                           "at_wini" "AT/IDE Driver" on \
+                           "bios_wini" "BIOS Driver" off `
++    done
+     service up /sbin/$r -dev /dev/c0d0
+ }
+ 
+@@ -113,6 +125,8 @@
+ allethdrivers="fxp dpeth rtl8139 dp8390 lance"
+ 
+ ethernet_chip() {
++    r=""
++    while test -z "$r" ; do
+     r=`dialog --no-cancel --stdout \
+               --radiolist \
+               "Please select your ethernet card" 0 0 0 \
+@@ -122,6 +136,7 @@
+               "Realtek 8029 based card (use by Qemu)" "" off \
+               "NE2000, 3Com 503 or WD based card (used by Bochs)" "" off \
+               "AMD LANCE (used by VMware)" "" on `
++    done
+ 
+     case $r in
+         Intel*) q="fxp@" ;;
+@@ -141,15 +156,20 @@
+ }
+ 
+ dhcp_or_manual() {
++    r=""
++    while test -z "$r" ; do
+     r=`dialog --no-cancel --stdout \
+               --radiolist \
+               "Network Settings" 0 0 0 \
+               "Manual" "" on \
+               "DHCP" "" off `
++    done
+     test "$r" = "Manual" && netdhcp=0 || netdhcp=1
+ }
+ 
+ network_settings() {
++    r=""
++    while test -z "$r" ; do
+     r=`dialog --no-cancel --stdout \
+               --form \
+               "Network Settings" 0 0 0 \
+@@ -158,6 +178,7 @@
+               "Nameserver" 3 0 "$netdns"  3 15 15 15 \
+               "Gateway"    4 0 "$netgw"   4 15 15 15 \
+               "MTU"        5 0 "$netmtu"  5 15  5  5 `
++    done
+     netip=`  echo "$r" | head -1`
+     netmask=`echo "$r" | head -2 | tail -1`
+     netdns=` echo "$r" | head -3 | tail -1`
+
+
+
+From nobody at sheep.berlios.de  Tue Jun 19 13:10:31 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Tue, 19 Jun 2007 13:10:31 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.16,1.17
+Message-ID: <20070619111031.7DAEBF4B1B@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv10789
+
+Modified Files:
+	start.sh 
+Log Message:
+cosmetics, reindent
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.16
+retrieving revision 1.17
+diff -u -d -r1.16 -r1.17
+--- start.sh	19 Jun 2007 11:05:23 -0000	1.16
++++ start.sh	19 Jun 2007 11:08:08 -0000	1.17
+@@ -51,10 +51,9 @@
+     done
+     r=""
+     while test -z "$r" ; do
+-    r=`eval dialog --no-cancel --stdout \
+-              --radiolist \"Please select a keymap\" 0 0 0 \
+-                          us-std \"\" on \
+-                          $items`
++        r=`eval dialog --no-cancel --stdout \
++                       --radiolist \"Please select a keymap\" 0 0 0 \
++                       us-std \"\" on $items`
+     done
+     loadkeys $keymaps/$r.map
+ }
+@@ -67,8 +66,8 @@
+     D=`date +%d`
+     r=""
+     while test -z "$r" ; do
+-    r=`dialog --no-cancel --stdout \
+-              --calendar "Please specify the current date" 0 0 $D $M $Y`
++        r=`dialog --no-cancel --stdout \
++                  --calendar "Please specify the current date" 0 0 $D $M $Y`
+     done
+     D=`echo $r | cut -d '/' -f 1`
+     M=`echo $r | cut -d '/' -f 2`
+@@ -82,8 +81,8 @@
+     s=`date +%S`
+     r=""
+     while test -z "$r" ; do
+-    r=`dialog --no-cancel --stdout \
+-              --timebox "Please specify the current time" 0 0 $h $m $s`
++        r=`dialog --no-cancel --stdout \
++                  --timebox "Please specify the current time" 0 0 $h $m $s`
+     done
+     h=`echo $r | cut -d ':' -f 1`
+     m=`echo $r | cut -d ':' -f 2`
+@@ -112,10 +111,10 @@
+ at_or_bios_wini() {
+     r=""
+     while test -z "$r" ; do
+-    r=`dialog --no-cancel --stdout \
+-              --radiolist "Please select an I/O driver" 0 0 0 \
+-                          "at_wini" "AT/IDE Driver" on \
+-                          "bios_wini" "BIOS Driver" off `
++        r=`dialog --no-cancel --stdout \
++                  --radiolist "Please select an I/O driver" 0 0 0 \
++                              "at_wini" "AT/IDE Driver" on \
++                              "bios_wini" "BIOS Driver" off `
+     done
+     service up /sbin/$r -dev /dev/c0d0
+ }
+@@ -127,15 +126,15 @@
+ ethernet_chip() {
+     r=""
+     while test -z "$r" ; do
+-    r=`dialog --no-cancel --stdout \
+-              --radiolist \
+-              "Please select your ethernet card" 0 0 0 \
+-              "Intel Pro/100" "" off \
+-              "3Com 501 / 3Com 509 based card" "" off \
+-              "Realtek 8139 based card" "" off \
+-              "Realtek 8029 based card (use by Qemu)" "" off \
+-              "NE2000, 3Com 503 or WD based card (used by Bochs)" "" off \
+-              "AMD LANCE (used by VMware)" "" on `
++        r=`dialog --no-cancel --stdout \
++                  --radiolist \
++                  "Please select your ethernet card" 0 0 0 \
++                  "Intel Pro/100" "" off \
++                  "3Com 501 / 3Com 509 based card" "" off \
++                  "Realtek 8139 based card" "" off \
++                  "Realtek 8029 based card (use by Qemu)" "" off \
++                  "NE2000, 3Com 503 or WD based card (used by Bochs)" "" off \
++                  "AMD LANCE (used by VMware)" "" on `
+     done
+ 
+     case $r in
+@@ -158,11 +157,11 @@
+ dhcp_or_manual() {
+     r=""
+     while test -z "$r" ; do
+-    r=`dialog --no-cancel --stdout \
+-              --radiolist \
+-              "Network Settings" 0 0 0 \
+-              "Manual" "" on \
+-              "DHCP" "" off `
++        r=`dialog --no-cancel --stdout \
++                  --radiolist \
++                  "Network Settings" 0 0 0 \
++                  "Manual" "" on \
++                  "DHCP" "" off `
+     done
+     test "$r" = "Manual" && netdhcp=0 || netdhcp=1
+ }
+@@ -170,14 +169,14 @@
+ network_settings() {
+     r=""
+     while test -z "$r" ; do
+-    r=`dialog --no-cancel --stdout \
+-              --form \
+-              "Network Settings" 0 0 0 \
+-              "IP Address" 1 0 "$netip"   1 15 15 15 \
+-              "Netmask"    2 0 "$netmask" 2 15 15 15 \
+-              "Nameserver" 3 0 "$netdns"  3 15 15 15 \
+-              "Gateway"    4 0 "$netgw"   4 15 15 15 \
+-              "MTU"        5 0 "$netmtu"  5 15  5  5 `
++        r=`dialog --no-cancel --stdout \
++                  --form \
++                  "Network Settings" 0 0 0 \
++                  "IP Address" 1 0 "$netip"   1 15 15 15 \
++                  "Netmask"    2 0 "$netmask" 2 15 15 15 \
++                  "Nameserver" 3 0 "$netdns"  3 15 15 15 \
++                  "Gateway"    4 0 "$netgw"   4 15 15 15 \
++                  "MTU"        5 0 "$netmtu"  5 15  5  5 `
+     done
+     netip=`  echo "$r" | head -1`
+     netmask=`echo "$r" | head -2 | tail -1`
+
+
+
+From nobody at sheep.berlios.de  Tue Jun 19 13:13:57 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Tue, 19 Jun 2007 13:13:57 +0200 (CEST)
+Subject: [Mpm-cvslog] lazybox TODO,NONE,1.1
+Message-ID: <20070619111357.9BBA8E9C2A@mail.berlios.de>
+
+Update of /cvsroot/mpm/lazybox
+In directory sheep:/tmp/cvs-serv13764
+
+Added Files:
+	TODO 
+Log Message:
+start TODO list
+
+
+--- NEW FILE: TODO ---
+chgrp == chown
+uptime == last
+perhaps add part and sh and other non-'simple' tools
+
+
+
+From nobody at sheep.berlios.de  Tue Jun 19 13:16:01 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Tue, 19 Jun 2007 13:16:01 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK usr.proto,1.9,1.10
+Message-ID: <20070619111601.77510787BC@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv15679
+
+Modified Files:
+	usr.proto 
+Log Message:
+add partition editor
+
+
+Index: usr.proto
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/usr.proto,v
+retrieving revision 1.9
+retrieving revision 1.10
+diff -u -d -r1.9 -r1.10
+--- usr.proto	18 Jun 2007 19:42:21 -0000	1.9
++++ usr.proto	19 Jun 2007 11:13:38 -0000	1.10
+@@ -18,6 +18,7 @@
+         loadkeys ---755 0 0 /bin/loadkeys
+         start.sh ---755 0 0 start.sh
+         printparts ---755 0 0 printparts/printparts
++        part ---755 0 0 /usr/bin/part
+ 	$
+ 	etc d--755 0 0
+         rc ---755 0 0 rc.usr
+
+
+
+From nobody at sheep.berlios.de  Tue Jun 19 23:05:45 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Tue, 19 Jun 2007 23:05:45 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.17,1.18
+Message-ID: <20070619210545.36EDBEA767@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv4722
+
+Modified Files:
+	start.sh 
+Log Message:
+sleep some more in case bringing up the network failed the first time around
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.17
+retrieving revision 1.18
+diff -u -d -r1.17 -r1.18
+--- start.sh	19 Jun 2007 11:08:08 -0000	1.17
++++ start.sh	19 Jun 2007 21:03:21 -0000	1.18
+@@ -193,7 +193,6 @@
+ 
+ network_restart() {
+     dialog --infobox "Preparing..." 3 40
+-    sleep 1
+ 
+     echo "eth0 $ethdriver 0 { default; };" > /etc/inet.conf
+     echo "127.0.0.1 localhost" >  /etc/hosts
+@@ -203,10 +202,12 @@
+     pid=`cat /usr/run/nonamed.pid 2>/dev/null`
+     test -n "$pid" && kill $pid
+     kill_service_by_fullname /sbin/inet
++    sleep 1
+ 
+     for i in $allethdrivers ; do
+         kill_service_by_fullname /sbin/$i
+     done
++    sleep 1
+ 
+     dialog --infobox "Bringing up networking..." 3 40
+     sleep 1
+@@ -217,6 +218,7 @@
+     ifconfig -I /dev/ip -h $netip -n $netmask -m $netmtu
+     add_route -I /dev/ip -g $netgw
+     nonamed -L &
++    sleep 1
+ }
+ 
+ # -----------------------------------------------------------------------------
+
+
+
+From nobody at sheep.berlios.de  Wed Jun 20 12:39:24 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Wed, 20 Jun 2007 12:39:24 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.18,1.19
+Message-ID: <20070620103924.1655A2D2A6@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv5517
+
+Modified Files:
+	start.sh 
+Log Message:
+enable dhcp
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.18
+retrieving revision 1.19
+diff -u -d -r1.18 -r1.19
+--- start.sh	19 Jun 2007 21:03:21 -0000	1.18
++++ start.sh	20 Jun 2007 10:36:59 -0000	1.19
+@@ -215,9 +215,14 @@
+     test -n "$ethjustargs" && args="-args $ethjustargs"
+     service up /sbin/$ethdriver $args -period 5HZ
+     service up /sbin/inet
++
++    if test $netdhcp -eq 1 ; then
++        dhcpd &
++    else
+     ifconfig -I /dev/ip -h $netip -n $netmask -m $netmtu
+     add_route -I /dev/ip -g $netgw
+     nonamed -L &
++    fi
+     sleep 1
+ }
+ 
+@@ -248,6 +253,10 @@
+     network_restart
+ 
+     ping $netdns >/dev/null 2>&1 && netup=yes
++
++    trap '' 2
++    intr -t 10 hostaddr -h || netup=no
++    trap 2
+ 
+     if test "$netup" = "no" ; then
+         dialog --ok-label "Retry" --msgbox "Cannot bring up networking!" 5 40
+
+
+
+From nobody at sheep.berlios.de  Wed Jun 20 12:39:56 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Wed, 20 Jun 2007 12:39:56 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.19,1.20
+Message-ID: <20070620103956.524EB2D2A6@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv6385
+
+Modified Files:
+	start.sh 
+Log Message:
+cosmetics, indentation
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.19
+retrieving revision 1.20
+diff -u -d -r1.19 -r1.20
+--- start.sh	20 Jun 2007 10:36:59 -0000	1.19
++++ start.sh	20 Jun 2007 10:37:32 -0000	1.20
+@@ -219,9 +219,9 @@
+     if test $netdhcp -eq 1 ; then
+         dhcpd &
+     else
+-    ifconfig -I /dev/ip -h $netip -n $netmask -m $netmtu
+-    add_route -I /dev/ip -g $netgw
+-    nonamed -L &
++        ifconfig -I /dev/ip -h $netip -n $netmask -m $netmtu
++        add_route -I /dev/ip -g $netgw
++        nonamed -L &
+     fi
+     sleep 1
+ }
+
+
+
+From nobody at sheep.berlios.de  Wed Jun 20 12:46:55 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Wed, 20 Jun 2007 12:46:55 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.20,1.21
+Message-ID: <20070620104655.38148DA2F5@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv16220
+
+Modified Files:
+	start.sh 
+Log Message:
+kill dhcpd if network is started for the second time in case the first time
+failed. seems to panic the lance driver, but because of rs it's not a serious
+problem
+
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.20
+retrieving revision 1.21
+diff -u -d -r1.20 -r1.21
+--- start.sh	20 Jun 2007 10:37:32 -0000	1.20
++++ start.sh	20 Jun 2007 10:44:30 -0000	1.21
+@@ -191,6 +191,12 @@
+     test -n "$pid" && service down $pid
+ }
+ 
++kill_proc_by_fullname() {
++    tmp=`ps -ef | grep $1 | grep -v grep`
++    pid=`echo $tmp | cut -d ' ' -f 4`
++    test -n "$pid" && kill $2 $pid
++}
++
+ network_restart() {
+     dialog --infobox "Preparing..." 3 40
+ 
+@@ -201,6 +207,7 @@
+ 
+     pid=`cat /usr/run/nonamed.pid 2>/dev/null`
+     test -n "$pid" && kill $pid
++    kill_proc_by_fullname dhcpd
+     kill_service_by_fullname /sbin/inet
+     sleep 1
+ 
+
+
+
+From nobody at sheep.berlios.de  Wed Jun 20 12:48:50 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Wed, 20 Jun 2007 12:48:50 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.21,1.22
+Message-ID: <20070620104850.67BA56F962@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv18600
+
+Modified Files:
+	start.sh 
+Log Message:
+if we do kill dhcpd, sleep a bit so we are (pretty) sure that our eth driver
+got resurrected, so it can be killed gently afterwards
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.21
+retrieving revision 1.22
+diff -u -d -r1.21 -r1.22
+--- start.sh	20 Jun 2007 10:44:30 -0000	1.21
++++ start.sh	20 Jun 2007 10:46:26 -0000	1.22
+@@ -194,7 +194,7 @@
+ kill_proc_by_fullname() {
+     tmp=`ps -ef | grep $1 | grep -v grep`
+     pid=`echo $tmp | cut -d ' ' -f 4`
+-    test -n "$pid" && kill $2 $pid
++    test -n "$pid" && kill $2 $pid && sleep 3
+ }
+ 
+ network_restart() {
+
+
+
+From nobody at sheep.berlios.de  Wed Jun 20 19:17:16 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Wed, 20 Jun 2007 19:17:16 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.22,1.23
+Message-ID: <20070620171716.77977F59E0@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv30506
+
+Modified Files:
+	start.sh 
+Log Message:
+assume bringing up the network went well. after that, test hostaddress. if
+there is one assigned, test pinging the nameserver. if one of those tests
+fails, set netup to 'no' and retry with (presumably) different network
+settings
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.22
+retrieving revision 1.23
+diff -u -d -r1.22 -r1.23
+--- start.sh	20 Jun 2007 10:46:26 -0000	1.22
++++ start.sh	20 Jun 2007 17:14:52 -0000	1.23
+@@ -259,11 +259,17 @@
+ 
+     network_restart
+ 
+-    ping $netdns >/dev/null 2>&1 && netup=yes
++    netup=yes
+ 
+     trap '' 2
+     intr -t 10 hostaddr -h || netup=no
+     trap 2
++
++    if test "$netup" = "yes" ; then
++        trap '' 2
++        intr -t 10 ping $netdns >/dev/null 2>&1 || netup=no
++        trap 2
++    fi
+ 
+     if test "$netup" = "no" ; then
+         dialog --ok-label "Retry" --msgbox "Cannot bring up networking!" 5 40
+
+
+
+From nobody at sheep.berlios.de  Wed Jun 20 21:32:09 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Wed, 20 Jun 2007 21:32:09 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.23,1.24
+Message-ID: <20070620193209.AC8A0F5617@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv3024
+
+Modified Files:
+	start.sh 
+Log Message:
+put network related code in own function
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.23
+retrieving revision 1.24
+diff -u -d -r1.23 -r1.24
+--- start.sh	20 Jun 2007 17:14:52 -0000	1.23
++++ start.sh	20 Jun 2007 19:29:46 -0000	1.24
+@@ -233,6 +233,36 @@
+     sleep 1
+ }
+ 
++network() {
++    while test "$netup" = "no" ; do
++        ethernet_chip
++        dhcp_or_manual
++        test $netdhcp -eq 0 && network_settings
++
++        network_restart
++
++        netup=yes
++
++        trap '' 2
++        intr -t 10 hostaddr -h || netup=no
++        trap 2
++
++        if test "$netup" = "yes" ; then
++            trap '' 2
++            intr -t 10 ping $netdns >/dev/null 2>&1 || netup=no
++            trap 2
++        fi
++
++        if test "$netup" = "no" ; then
++            dialog --ok-label "Retry" \
++                   --msgbox "Cannot bring up networking!" 5 40
++        else
++            dialog --ok-label "Continue" \
++                   --msgbox "Networking OK" 5 40
++        fi
++    done
++}
++
+ # -----------------------------------------------------------------------------
+ 
+ ethname="none"
+@@ -251,32 +281,7 @@
+ set_keymap
+ time_and_date
+ at_or_bios_wini
+-
+-while test "$netup" = "no" ; do
+-    ethernet_chip
+-    dhcp_or_manual
+-    test $netdhcp -eq 0 && network_settings
+-
+-    network_restart
+-
+-    netup=yes
+-
+-    trap '' 2
+-    intr -t 10 hostaddr -h || netup=no
+-    trap 2
+-
+-    if test "$netup" = "yes" ; then
+-        trap '' 2
+-        intr -t 10 ping $netdns >/dev/null 2>&1 || netup=no
+-        trap 2
+-    fi
+-
+-    if test "$netup" = "no" ; then
+-        dialog --ok-label "Retry" --msgbox "Cannot bring up networking!" 5 40
+-    else
+-        dialog --ok-label "Continue" --msgbox "Networking OK" 5 40
+-    fi
+-done
++network
+ 
+ # -----------------------------------------------------------------------------
+ 
+
+
+
+From nobody at sheep.berlios.de  Wed Jun 20 21:33:56 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Wed, 20 Jun 2007 21:33:56 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.24,1.25
+Message-ID: <20070620193356.81DD7F41BF@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv3591
+
+Modified Files:
+	start.sh 
+Log Message:
+start of partition selection
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.24
+retrieving revision 1.25
+diff -u -d -r1.24 -r1.25
+--- start.sh	20 Jun 2007 19:29:46 -0000	1.24
++++ start.sh	20 Jun 2007 19:31:33 -0000	1.25
+@@ -265,6 +265,12 @@
+ 
+ # -----------------------------------------------------------------------------
+ 
++partitions() {
++    :
++}
++
++# -----------------------------------------------------------------------------
++
+ ethname="none"
+ ethdriver="none"
+ ethargs=""
+@@ -282,6 +288,7 @@
+ time_and_date
+ at_or_bios_wini
+ network
++partitions
+ 
+ # -----------------------------------------------------------------------------
+ 
+
+
+
+From nobody at sheep.berlios.de  Wed Jun 20 21:35:14 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Wed, 20 Jun 2007 21:35:14 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.25,1.26
+Message-ID: <20070620193514.E10E0F41BF@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv3993
+
+Modified Files:
+	start.sh 
+Log Message:
+set about dialog's exit button label
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.25
+retrieving revision 1.26
+diff -u -d -r1.25 -r1.26
+--- start.sh	20 Jun 2007 19:31:33 -0000	1.25
++++ start.sh	20 Jun 2007 19:32:51 -0000	1.26
+@@ -33,7 +33,8 @@
+         case "$r" in
+             Install)    : ;;
+             About)
+-                dialog --no-cancel --begin 3 1 --textbox $ABOUT 20 76 
++                dialog --no-cancel --exit-label "Back" \
++                       --begin 3 1 --textbox $ABOUT 20 76 
+                 ;;
+             Exit)       exit 0 ;;
+         esac
+
+
+
+From nobody at sheep.berlios.de  Wed Jun 20 21:45:49 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Wed, 20 Jun 2007 21:45:49 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK/printparts printparts.c,1.4,1.5
+Message-ID: <20070620194549.8A04DF261F@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK/printparts
+In directory sheep:/tmp/cvs-serv6570
+
+Modified Files:
+	printparts.c 
+Log Message:
+bytes is factor 1, not 0 (fixes divide by zero)
+
+
+Index: printparts.c
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/printparts/printparts.c,v
+retrieving revision 1.4
+retrieving revision 1.5
+diff -u -d -r1.4 -r1.5
+--- printparts.c	15 Jun 2007 11:46:44 -0000	1.4
++++ printparts.c	20 Jun 2007 19:43:26 -0000	1.5
+@@ -41,7 +41,7 @@
+ #define UNITS_GB    3
+ 
+ static const char* unitstr[4] = { "bytes", "kB", "MB", "GB" };
+-static const unsigned int factors[4] = { 0, 1024, 1024*1024, 1024*1024*1024 };
++static const unsigned int factors[4] = { 1, 1024, 1024*1024, 1024*1024*1024 };
+ 
+ static int cflag = 0, dflag = 0, eflag = 0, uflag = 0, units = UNITS_B;
+ 
+
+
+
+From nobody at sheep.berlios.de  Wed Jun 20 22:14:59 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Wed, 20 Jun 2007 22:14:59 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.26,1.27
+Message-ID: <20070620201459.A1453E573F@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv10506
+
+Modified Files:
+	start.sh 
+Log Message:
+introduction to partitioning
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.26
+retrieving revision 1.27
+diff -u -d -r1.26 -r1.27
+--- start.sh	20 Jun 2007 19:32:51 -0000	1.26
++++ start.sh	20 Jun 2007 20:12:36 -0000	1.27
+@@ -266,8 +266,29 @@
+ 
+ # -----------------------------------------------------------------------------
+ 
++part_intro() {
++    dialog --no-cancel --ok-label "Continue" --begin 3 1 \
++           --msgbox \
++"Next, we have to select the partition to which the system will be
++installed. Minix devices are specified as follows:
++
++/dev/c0d0[p0[s0]]
++      ^ ^  ^  ^
++      | |  |  +-- subpartitions (0-3)
++      | |  +----- primary partitions (0-3)
++      | +-------- device (0-7)
++      +---------- controller
++
++e.g. c0d0 is the first device, c0d1p1 is the second partition on the
++second device, et cetera.
++
++Minix can only be installed on primary partitions of IDE devices (SCSI
++is not supported yet).
++" 20 76 
++}
++
+ partitions() {
+-    :
++    part_intro
+ }
+ 
+ # -----------------------------------------------------------------------------
+@@ -283,12 +304,16 @@
+ netgw=192.168.0.1
+ netmtu=1500
+ netup=no
++instprim=""
++insts0=""       # /
++insts1=""       # /home
++insts2=""       # /usr
+ 
+ welcome
+-set_keymap
+-time_and_date
+-at_or_bios_wini
+-network
++#set_keymap
++#time_and_date
++#at_or_bios_wini
++#network
+ partitions
+ 
+ # -----------------------------------------------------------------------------
+
+
+
+From nobody at sheep.berlios.de  Wed Jun 20 22:22:18 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Wed, 20 Jun 2007 22:22:18 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK usr.proto,1.10,1.11
+Message-ID: <20070620202218.6E3EB65B88@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv11804
+
+Modified Files:
+	usr.proto 
+Log Message:
+add dhcpd
+
+
+Index: usr.proto
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/usr.proto,v
+retrieving revision 1.10
+retrieving revision 1.11
+diff -u -d -r1.10 -r1.11
+--- usr.proto	19 Jun 2007 11:13:38 -0000	1.10
++++ usr.proto	20 Jun 2007 20:19:55 -0000	1.11
+@@ -19,6 +19,7 @@
+         start.sh ---755 0 0 start.sh
+         printparts ---755 0 0 printparts/printparts
+         part ---755 0 0 /usr/bin/part
++        dhcpd ---755 0 0 /usr/bin/dhcpd
+ 	$
+ 	etc d--755 0 0
+         rc ---755 0 0 rc.usr
+
+
+
+From nobody at sheep.berlios.de  Wed Jun 20 22:22:42 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Wed, 20 Jun 2007 22:22:42 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.27,1.28
+Message-ID: <20070620202242.2212665B88@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv11841
+
+Modified Files:
+	start.sh 
+Log Message:
+10l, remove debugging #'s
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.27
+retrieving revision 1.28
+diff -u -d -r1.27 -r1.28
+--- start.sh	20 Jun 2007 20:12:36 -0000	1.27
++++ start.sh	20 Jun 2007 20:20:18 -0000	1.28
+@@ -310,10 +310,10 @@
+ insts2=""       # /usr
+ 
+ welcome
+-#set_keymap
+-#time_and_date
+-#at_or_bios_wini
+-#network
++set_keymap
++time_and_date
++at_or_bios_wini
++network
+ partitions
+ 
+ # -----------------------------------------------------------------------------
+
+
+
+From nobody at sheep.berlios.de  Thu Jun 21 12:24:22 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Thu, 21 Jun 2007 12:24:22 +0200 (CEST)
+Subject: [Mpm-cvslog] gfx generic.c, 1.5, 1.6 generic.h, 1.3, 1.4 gfx.c, 1.6,
+	1.7 gfx.h, 1.16, 1.17 gfx_ioctl.c, 1.10, 1.11 gfx_ioctl.h,
+	1.10, 1.11 license.h, 1.1, 1.2 svga_vesa.c, 1.5, 1.6 vesa.h,
+	1.3, 1.4 vga_bios.c, 1.17, 1.18 vga_raw.c, 1.34,
+	1.35 vga_regs.h, 1.2, 1.3
+Message-ID: <20070621102422.7F344F5B2F@mail.berlios.de>
+
+Update of /cvsroot/mpm/gfx
+In directory sheep:/tmp/cvs-serv28948
+
+Modified Files:
+	generic.c generic.h gfx.c gfx.h gfx_ioctl.c gfx_ioctl.h 
+	license.h svga_vesa.c vesa.h vga_bios.c vga_raw.c vga_regs.h 
+Log Message:
+remove references to regents
+
+
+Index: generic.c
+===================================================================
+RCS file: /cvsroot/mpm/gfx/generic.c,v
+retrieving revision 1.5
+retrieving revision 1.6
+diff -u -d -r1.5 -r1.6
+--- generic.c	21 Nov 2006 18:41:09 -0000	1.5
++++ generic.c	21 Jun 2007 10:21:58 -0000	1.6
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: generic.h
+===================================================================
+RCS file: /cvsroot/mpm/gfx/generic.h,v
+retrieving revision 1.3
+retrieving revision 1.4
+diff -u -d -r1.3 -r1.4
+--- generic.h	19 Nov 2006 21:21:29 -0000	1.3
++++ generic.h	21 Jun 2007 10:21:58 -0000	1.4
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: gfx.c
+===================================================================
+RCS file: /cvsroot/mpm/gfx/gfx.c,v
+retrieving revision 1.6
+retrieving revision 1.7
+diff -u -d -r1.6 -r1.7
+--- gfx.c	21 Nov 2006 18:41:09 -0000	1.6
++++ gfx.c	21 Jun 2007 10:21:58 -0000	1.7
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: gfx.h
+===================================================================
+RCS file: /cvsroot/mpm/gfx/gfx.h,v
+retrieving revision 1.16
+retrieving revision 1.17
+diff -u -d -r1.16 -r1.17
+--- gfx.h	21 Nov 2006 18:41:09 -0000	1.16
++++ gfx.h	21 Jun 2007 10:21:58 -0000	1.17
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: gfx_ioctl.c
+===================================================================
+RCS file: /cvsroot/mpm/gfx/gfx_ioctl.c,v
+retrieving revision 1.10
+retrieving revision 1.11
+diff -u -d -r1.10 -r1.11
+--- gfx_ioctl.c	21 Nov 2006 18:41:09 -0000	1.10
++++ gfx_ioctl.c	21 Jun 2007 10:21:58 -0000	1.11
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: gfx_ioctl.h
+===================================================================
+RCS file: /cvsroot/mpm/gfx/gfx_ioctl.h,v
+retrieving revision 1.10
+retrieving revision 1.11
+diff -u -d -r1.10 -r1.11
+--- gfx_ioctl.h	19 Nov 2006 21:04:42 -0000	1.10
++++ gfx_ioctl.h	21 Jun 2007 10:21:58 -0000	1.11
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: license.h
+===================================================================
+RCS file: /cvsroot/mpm/gfx/license.h,v
+retrieving revision 1.1
+retrieving revision 1.2
+diff -u -d -r1.1 -r1.2
+--- license.h	19 Nov 2006 21:04:42 -0000	1.1
++++ license.h	21 Jun 2007 10:21:58 -0000	1.2
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: svga_vesa.c
+===================================================================
+RCS file: /cvsroot/mpm/gfx/svga_vesa.c,v
+retrieving revision 1.5
+retrieving revision 1.6
+diff -u -d -r1.5 -r1.6
+--- svga_vesa.c	21 Nov 2006 18:41:09 -0000	1.5
++++ svga_vesa.c	21 Jun 2007 10:21:58 -0000	1.6
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+@@ -141,13 +141,27 @@
+         report(myname, tmp, NO_NUM);
+         snprintf(tmp, 80, "TotalMemory: %i kB", VI_TOTALMEMORY(vesa) * 64);
+         report(myname, tmp, NO_NUM);
+-        r = sys_umap(SELF, D, tmp, 80, &tmp_phys);
++        r = sys_umap(SELF, D, (vir_bytes) tmp, 80, &tmp_phys);
+         if (r != OK) panic(myname, "sys_umap failed", r);
+         ptr = ((VI_OEMSTRINGPTR(vesa) >> 12) & 0x000f0000) + (VI_OEMSTRINGPTR(vesa) & 0x0000ffff);
+         r = sys_abscopy(ptr, tmp_phys, 80);
+         if (r != OK) panic(myname, "sys_abscopy failed", r);
+         tmp[79] = 0;
+         report(myname, tmp, NO_NUM);
++
++        ptr = ((VI_VIDEOMODEPTR(vesa) >> 12) & 0x000f0000) + (VI_VIDEOMODEPTR(vesa) & 0x0000ffff);
++
++#if 0
++        do {
++            int i;
++            r = sys_abscopy(ptr, tmp_phys, 2);
++            if (r != OK) panic(myname, "sys_abscopy failed", r);
++            ptr += 2;
++            i = (tmp[1]<<8)+tmp[0];
++            snprintf(tmp, 80, "listed mode: %04x", i);
++            report(myname, tmp, NO_NUM);
++        } while (i >= 0);
++#endif
+     }
+ #endif
+ 
+
+Index: vesa.h
+===================================================================
+RCS file: /cvsroot/mpm/gfx/vesa.h,v
+retrieving revision 1.3
+retrieving revision 1.4
+diff -u -d -r1.3 -r1.4
+--- vesa.h	20 Nov 2006 22:26:05 -0000	1.3
++++ vesa.h	21 Jun 2007 10:21:58 -0000	1.4
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: vga_bios.c
+===================================================================
+RCS file: /cvsroot/mpm/gfx/vga_bios.c,v
+retrieving revision 1.17
+retrieving revision 1.18
+diff -u -d -r1.17 -r1.18
+--- vga_bios.c	21 Nov 2006 18:41:09 -0000	1.17
++++ vga_bios.c	21 Jun 2007 10:21:58 -0000	1.18
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: vga_raw.c
+===================================================================
+RCS file: /cvsroot/mpm/gfx/vga_raw.c,v
+retrieving revision 1.34
+retrieving revision 1.35
+diff -u -d -r1.34 -r1.35
+--- vga_raw.c	21 Nov 2006 18:41:09 -0000	1.34
++++ vga_raw.c	21 Jun 2007 10:21:58 -0000	1.35
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: vga_regs.h
+===================================================================
+RCS file: /cvsroot/mpm/gfx/vga_regs.h,v
+retrieving revision 1.2
+retrieving revision 1.3
+diff -u -d -r1.2 -r1.3
+--- vga_regs.h	19 Nov 2006 21:04:42 -0000	1.2
++++ vga_regs.h	21 Jun 2007 10:21:58 -0000	1.3
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+
+
+From nobody at sheep.berlios.de  Thu Jun 21 12:27:24 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Thu, 21 Jun 2007 12:27:24 +0200 (CEST)
+Subject: [Mpm-cvslog] lazybox lazybox.c,1.11,1.12
+Message-ID: <20070621102724.DD2A4E8CC0@mail.berlios.de>
+
+Update of /cvsroot/mpm/lazybox
+In directory sheep:/tmp/cvs-serv29056
+
+Modified Files:
+	lazybox.c 
+Log Message:
+remove reference to regents
+
+
+Index: lazybox.c
+===================================================================
+RCS file: /cvsroot/mpm/lazybox/lazybox.c,v
+retrieving revision 1.11
+retrieving revision 1.12
+diff -u -d -r1.11 -r1.12
+--- lazybox.c	31 Oct 2006 13:54:47 -0000	1.11
++++ lazybox.c	21 Jun 2007 10:25:01 -0000	1.12
+@@ -17,10 +17,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+
+
+From nobody at sheep.berlios.de  Thu Jun 21 12:29:35 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Thu, 21 Jun 2007 12:29:35 +0200 (CEST)
+Subject: [Mpm-cvslog] progmtr LICENSE,1.1,1.2 progmtr.c,1.13,1.14
+Message-ID: <20070621102935.8AF1AF386F@mail.berlios.de>
+
+Update of /cvsroot/mpm/progmtr
+In directory sheep:/tmp/cvs-serv29230
+
+Modified Files:
+	LICENSE progmtr.c 
+Log Message:
+regents->copyright holders
+
+
+Index: LICENSE
+===================================================================
+RCS file: /cvsroot/mpm/progmtr/LICENSE,v
+retrieving revision 1.1
+retrieving revision 1.2
+diff -u -d -r1.1 -r1.2
+--- LICENSE	29 Sep 2006 19:43:43 -0000	1.1
++++ LICENSE	21 Jun 2007 10:27:12 -0000	1.2
+@@ -12,10 +12,10 @@
+     * My name may NOT be used to endorse or promote products derived from
+       this software without specific prior written permission.
+ 
+-THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+ EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+-DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: progmtr.c
+===================================================================
+RCS file: /cvsroot/mpm/progmtr/progmtr.c,v
+retrieving revision 1.13
+retrieving revision 1.14
+diff -u -d -r1.13 -r1.14
+--- progmtr.c	3 Oct 2006 09:51:20 -0000	1.13
++++ progmtr.c	21 Jun 2007 10:27:12 -0000	1.14
+@@ -17,10 +17,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+
+
+From nobody at sheep.berlios.de  Thu Jun 21 12:32:20 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Thu, 21 Jun 2007 12:32:20 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/heirloom-toolchest/FILES realpath.c,1.1,1.2
+Message-ID: <20070621103220.D01DBF5A88@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/heirloom-toolchest/FILES
+In directory sheep:/tmp/cvs-serv29348
+
+Modified Files:
+	realpath.c 
+Log Message:
+regents->copyright holder(s)
+
+
+Index: realpath.c
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/heirloom-toolchest/FILES/realpath.c,v
+retrieving revision 1.1
+retrieving revision 1.2
+diff -u -d -r1.1 -r1.2
+--- realpath.c	20 Oct 2006 22:12:49 -0000	1.1
++++ realpath.c	21 Jun 2007 10:29:57 -0000	1.2
+@@ -15,10 +15,10 @@
+  *    * My name may NOT be used to endorse or promote products derived from
+  *      this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+
+
+From nobody at sheep.berlios.de  Thu Jun 21 13:02:25 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Thu, 21 Jun 2007 13:02:25 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.28,1.29
+Message-ID: <20070621110225.79ADAE570E@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv6246
+
+Modified Files:
+	start.sh 
+Log Message:
+we have-->you have
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.28
+retrieving revision 1.29
+diff -u -d -r1.28 -r1.29
+--- start.sh	20 Jun 2007 20:20:18 -0000	1.28
++++ start.sh	21 Jun 2007 11:00:00 -0000	1.29
+@@ -269,7 +269,7 @@
+ part_intro() {
+     dialog --no-cancel --ok-label "Continue" --begin 3 1 \
+            --msgbox \
+-"Next, we have to select the partition to which the system will be
++"Next, you have to select the partition to which the system will be
+ installed. Minix devices are specified as follows:
+ 
+ /dev/c0d0[p0[s0]]
+
+
+
+From nobody at sheep.berlios.de  Thu Jun 21 13:03:59 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Thu, 21 Jun 2007 13:03:59 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.29,1.30
+Message-ID: <20070621110359.3E3DFF5BB6@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv8618
+
+Modified Files:
+	start.sh 
+Log Message:
+loop until done
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.29
+retrieving revision 1.30
+diff -u -d -r1.29 -r1.30
+--- start.sh	21 Jun 2007 11:00:00 -0000	1.29
++++ start.sh	21 Jun 2007 11:01:34 -0000	1.30
+@@ -288,7 +288,11 @@
+ }
+ 
+ partitions() {
++    partdone=no
++
++    while test "$partdone" = "no" ; do
+     part_intro
++    done
+ }
+ 
+ # -----------------------------------------------------------------------------
+
+
+
+From nobody at sheep.berlios.de  Thu Jun 21 13:04:17 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Thu, 21 Jun 2007 13:04:17 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.30,1.31
+Message-ID: <20070621110417.2A3B1F43F8@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv8882
+
+Modified Files:
+	start.sh 
+Log Message:
+cosmetics
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.30
+retrieving revision 1.31
+diff -u -d -r1.30 -r1.31
+--- start.sh	21 Jun 2007 11:01:34 -0000	1.30
++++ start.sh	21 Jun 2007 11:01:53 -0000	1.31
+@@ -291,7 +291,7 @@
+     partdone=no
+ 
+     while test "$partdone" = "no" ; do
+-    part_intro
++        part_intro
+     done
+ }
+ 
+
+
+
+From nobody at sheep.berlios.de  Tue Jun 26 09:07:11 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Tue, 26 Jun 2007 09:07:11 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.31,1.32
+Message-ID: <20070626070711.F206CF5780@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv31981
+
+Modified Files:
+	start.sh 
+Log Message:
+beginning of part_menu
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.31
+retrieving revision 1.32
+diff -u -d -r1.31 -r1.32
+--- start.sh	21 Jun 2007 11:01:53 -0000	1.31
++++ start.sh	24 Jun 2007 23:34:14 -0000	1.32
+@@ -287,11 +287,26 @@
+ " 20 76 
+ }
+ 
++part_menu() {
++    r=""
++    while test "$r" != "Select Partition" ; do
++        r=`dialog \
++                --stdout --no-cancel \
++                --menu "What do you want to do?" 0 0 0 \
++                "Select Partition" "" \
++                "Partition Editor" "" `
++        case "$r" in
++            Part*)  part    ;;
++        esac
++    done
++}
++
+ partitions() {
+     partdone=no
+ 
+     while test "$partdone" = "no" ; do
+         part_intro
++        part_menu
+     done
+ }
+ 
+
+
+
+From nobody at sheep.berlios.de  Tue Jun 26 09:08:47 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Tue, 26 Jun 2007 09:08:47 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.32,1.33
+Message-ID: <20070626070847.53C856B0FE@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv32062
+
+Modified Files:
+	start.sh 
+Log Message:
+revise copyright message
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.32
+retrieving revision 1.33
+diff -u -d -r1.32 -r1.33
+--- start.sh	24 Jun 2007 23:34:14 -0000	1.32
++++ start.sh	24 Jun 2007 23:35:50 -0000	1.33
+@@ -12,7 +12,7 @@
+ WELCOME="        Welcome to the MPMPORTS Minix distribution, $VERSION
+ 
+      MPMPORTS Framework Copyright (C) 2006-2007 by Ivo van Poorten
+-   Minix 3.1.2a Copyright (C) 1986-2006 Vrije Universiteit, Amsterdam
++      MINIX Copyright (C) 1986-2007 Vrije Universiteit, Amsterdam
+ The Vrije Universiteit DOES NOT actively endorse, support or affiliates
+                  itself with this project in ANY WAY
+ "
+
+
+
+From nobody at sheep.berlios.de  Sat Jun 30 23:32:26 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Sat, 30 Jun 2007 23:32:26 +0200 (CEST)
+Subject: [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.33,1.34
+Message-ID: <20070630213226.8E9C7F0CB0@mail.berlios.de>
+
+Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv31531
+
+Modified Files:
+	start.sh 
+Log Message:
+selection of primary partition
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.33
+retrieving revision 1.34
+diff -u -d -r1.33 -r1.34
+--- start.sh	24 Jun 2007 23:35:50 -0000	1.33
++++ start.sh	30 Jun 2007 21:32:22 -0000	1.34
+@@ -287,15 +287,34 @@
+ " 20 76 
+ }
+ 
++devdump=/tmp/devdump
++primdump=/tmp/primdump
++
++select_prim_part() {
++    dialog --infobox "Scanning devices..." 3 40
++    printparts -m -d -c > $devdump
++
++    grep "^    [^ ]" $devdump | cut -d ')' -f 1 |
++        sed 's/\(.*\)/\1 _ off/' > $primdump
++    primlist=`cat $primdump`
++
++    instprim=`dialog --stdout --keep-window --begin 3 1 \
++        --infobox "This are the devices I found..." 3 50 \
++        --and-widget --keep-window --begin 8 1 --exit-label "Continue" \
++        --textbox $devdump 15 50 \
++        --and-widget --begin 3 54 --no-cancel \
++        --radiolist "Select partition" 20 23 13 $primlist `
++}
++
+ part_menu() {
+-    r=""
+-    while test "$r" != "Select Partition" ; do
++    while test -z "$instprim" ; do
+         r=`dialog \
+                 --stdout --no-cancel \
+                 --menu "What do you want to do?" 0 0 0 \
+-                "Select Partition" "" \
++                "Select Primary Partition" "" \
+                 "Partition Editor" "" `
+         case "$r" in
++            Sele*)  select_prim_part    ;;
+             Part*)  part    ;;
+         esac
+     done
+
+
+

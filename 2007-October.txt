@@ -1,0 +1,125 @@
+From nobody at sheep.berlios.de  Tue Oct 30 11:55:46 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Tue, 30 Oct 2007 11:55:46 +0100 (CET)
+Subject: [Mpm-cvslog] lazybox Makefile,1.8,1.9
+Message-ID: <20071030105546.D1926DC35B@mail.berlios.de>
+
+Update of /cvsroot/mpm/lazybox
+In directory sheep:/tmp/cvs-serv16641
+
+Modified Files:
+	Makefile 
+Log Message:
+update SOURCEPATH
+
+
+Index: Makefile
+===================================================================
+RCS file: /cvsroot/mpm/lazybox/Makefile,v
+retrieving revision 1.8
+retrieving revision 1.9
+diff -u -d -r1.8 -r1.9
+--- Makefile	3 Oct 2006 13:14:51 -0000	1.8
++++ Makefile	30 Oct 2007 10:54:56 -0000	1.9
+@@ -4,7 +4,7 @@
+ CFLAGS     ?= -O -D_MINIX -I${SRCPATH} -I ${SRVSRCPATH} -I${FSSRCPATH} -w
+ LDFLAGS    ?= -stack 4096k -s
+ 
+-SOURCEPATH = /mnt/src.commands/simple
++SOURCEPATH = /mnt/src/commands/simple
+ SRCPATH    = /mnt/src
+ SRVSRCPATH = ${SRCPATH}/servers
+ FSSRCPATH  = ${SRVSRCPATH}/fs
+
+
+
+From nobody at sheep.berlios.de  Tue Oct 30 11:58:49 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Tue, 30 Oct 2007 11:58:49 +0100 (CET)
+Subject: [Mpm-cvslog] lazybox lazybox.c,1.12,1.13
+Message-ID: <20071030105849.7C2CEDC35B@mail.berlios.de>
+
+Update of /cvsroot/mpm/lazybox
+In directory sheep:/tmp/cvs-serv16821
+
+Modified Files:
+	lazybox.c 
+Log Message:
+protect against missing passwd or group file
+
+
+Index: lazybox.c
+===================================================================
+RCS file: /cvsroot/mpm/lazybox/lazybox.c,v
+retrieving revision 1.12
+retrieving revision 1.13
+diff -u -d -r1.12 -r1.13
+--- lazybox.c	21 Jun 2007 10:25:01 -0000	1.12
++++ lazybox.c	30 Oct 2007 10:57:59 -0000	1.13
+@@ -102,10 +102,12 @@
+     if (sugid >= 0) { /* drop to listed privileges */
+         if (sugidbins[sugid].u) {
+             pwd = getpwnam(sugidbins[sugid].u);
++            if (pwd)
+             uid = pwd->pw_uid;
+         }
+         if (sugidbins[sugid].g) {
+             grp = getgrnam(sugidbins[sugid].g);
++            if (grp)
+             gid = grp->gr_gid;
+         }
+     }
+
+
+
+From nobody at sheep.berlios.de  Tue Oct 30 11:59:46 2007
+From: nobody at sheep.berlios.de (ivop)
+Date: Tue, 30 Oct 2007 11:59:46 +0100 (CET)
+Subject: [Mpm-cvslog] lazybox lazybox.c,1.13,1.14
+Message-ID: <20071030105946.13806DC35B@mail.berlios.de>
+
+Update of /cvsroot/mpm/lazybox
+In directory sheep:/tmp/cvs-serv16947
+
+Modified Files:
+	lazybox.c 
+Log Message:
+cosmetics
+
+
+Index: lazybox.c
+===================================================================
+RCS file: /cvsroot/mpm/lazybox/lazybox.c,v
+retrieving revision 1.13
+retrieving revision 1.14
+diff -u -d -r1.13 -r1.14
+--- lazybox.c	30 Oct 2007 10:57:59 -0000	1.13
++++ lazybox.c	30 Oct 2007 10:58:55 -0000	1.14
+@@ -3,7 +3,7 @@
+  *
+  * Multi-call binary wrapper for Minix src/commands/simple
+  *
+- * Copyright (c) 2006, Ivo van Poorten
++ * Copyright (c) 2006, 2007, Ivo van Poorten
+  * All rights reserved.
+  *
+  * Redistribution and use in source and binary forms, with or without
+@@ -102,13 +102,11 @@
+     if (sugid >= 0) { /* drop to listed privileges */
+         if (sugidbins[sugid].u) {
+             pwd = getpwnam(sugidbins[sugid].u);
+-            if (pwd)
+-            uid = pwd->pw_uid;
++            if (pwd) uid = pwd->pw_uid;
+         }
+         if (sugidbins[sugid].g) {
+             grp = getgrnam(sugidbins[sugid].g);
+-            if (grp)
+-            gid = grp->gr_gid;
++            if (grp) gid = grp->gr_gid;
+         }
+     }
+ 
+
+
+

@@ -1,0 +1,195 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.16,1.17
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/mpm-cvslog/2007-June/index.html" >
+   <LINK REL="made" HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.16%2C1.17&In-Reply-To=%3C20070619111031.7DAEBF4B1B%40mail.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000033.html">
+   <LINK REL="Next"  HREF="000035.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.16,1.17</H1>
+    <B>ivop</B> 
+    <A HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.16%2C1.17&In-Reply-To=%3C20070619111031.7DAEBF4B1B%40mail.berlios.de%3E"
+       TITLE="[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.16,1.17">nobody at sheep.berlios.de
+       </A><BR>
+    <I>Tue Jun 19 13:10:31 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000033.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.15,1.16
+</A></li>
+        <LI>Next message: <A HREF="000035.html">[Mpm-cvslog] lazybox TODO,NONE,1.1
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#34">[ date ]</a>
+              <a href="thread.html#34">[ thread ]</a>
+              <a href="subject.html#34">[ subject ]</a>
+              <a href="author.html#34">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv10789
+
+Modified Files:
+	start.sh 
+Log Message:
+cosmetics, reindent
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.16
+retrieving revision 1.17
+diff -u -d -r1.16 -r1.17
+--- start.sh	19 Jun 2007 11:05:23 -0000	1.16
++++ start.sh	19 Jun 2007 11:08:08 -0000	1.17
+@@ -51,10 +51,9 @@
+     done
+     r=&quot;&quot;
+     while test -z &quot;$r&quot; ; do
+-    r=`eval dialog --no-cancel --stdout \
+-              --radiolist \&quot;Please select a keymap\&quot; 0 0 0 \
+-                          us-std \&quot;\&quot; on \
+-                          $items`
++        r=`eval dialog --no-cancel --stdout \
++                       --radiolist \&quot;Please select a keymap\&quot; 0 0 0 \
++                       us-std \&quot;\&quot; on $items`
+     done
+     loadkeys $keymaps/$r.map
+ }
+@@ -67,8 +66,8 @@
+     D=`date +%d`
+     r=&quot;&quot;
+     while test -z &quot;$r&quot; ; do
+-    r=`dialog --no-cancel --stdout \
+-              --calendar &quot;Please specify the current date&quot; 0 0 $D $M $Y`
++        r=`dialog --no-cancel --stdout \
++                  --calendar &quot;Please specify the current date&quot; 0 0 $D $M $Y`
+     done
+     D=`echo $r | cut -d '/' -f 1`
+     M=`echo $r | cut -d '/' -f 2`
+@@ -82,8 +81,8 @@
+     s=`date +%S`
+     r=&quot;&quot;
+     while test -z &quot;$r&quot; ; do
+-    r=`dialog --no-cancel --stdout \
+-              --timebox &quot;Please specify the current time&quot; 0 0 $h $m $s`
++        r=`dialog --no-cancel --stdout \
++                  --timebox &quot;Please specify the current time&quot; 0 0 $h $m $s`
+     done
+     h=`echo $r | cut -d ':' -f 1`
+     m=`echo $r | cut -d ':' -f 2`
+@@ -112,10 +111,10 @@
+ at_or_bios_wini() {
+     r=&quot;&quot;
+     while test -z &quot;$r&quot; ; do
+-    r=`dialog --no-cancel --stdout \
+-              --radiolist &quot;Please select an I/O driver&quot; 0 0 0 \
+-                          &quot;at_wini&quot; &quot;AT/IDE Driver&quot; on \
+-                          &quot;bios_wini&quot; &quot;BIOS Driver&quot; off `
++        r=`dialog --no-cancel --stdout \
++                  --radiolist &quot;Please select an I/O driver&quot; 0 0 0 \
++                              &quot;at_wini&quot; &quot;AT/IDE Driver&quot; on \
++                              &quot;bios_wini&quot; &quot;BIOS Driver&quot; off `
+     done
+     service up /sbin/$r -dev /dev/c0d0
+ }
+@@ -127,15 +126,15 @@
+ ethernet_chip() {
+     r=&quot;&quot;
+     while test -z &quot;$r&quot; ; do
+-    r=`dialog --no-cancel --stdout \
+-              --radiolist \
+-              &quot;Please select your ethernet card&quot; 0 0 0 \
+-              &quot;Intel Pro/100&quot; &quot;&quot; off \
+-              &quot;3Com 501 / 3Com 509 based card&quot; &quot;&quot; off \
+-              &quot;Realtek 8139 based card&quot; &quot;&quot; off \
+-              &quot;Realtek 8029 based card (use by Qemu)&quot; &quot;&quot; off \
+-              &quot;NE2000, 3Com 503 or WD based card (used by Bochs)&quot; &quot;&quot; off \
+-              &quot;AMD LANCE (used by VMware)&quot; &quot;&quot; on `
++        r=`dialog --no-cancel --stdout \
++                  --radiolist \
++                  &quot;Please select your ethernet card&quot; 0 0 0 \
++                  &quot;Intel Pro/100&quot; &quot;&quot; off \
++                  &quot;3Com 501 / 3Com 509 based card&quot; &quot;&quot; off \
++                  &quot;Realtek 8139 based card&quot; &quot;&quot; off \
++                  &quot;Realtek 8029 based card (use by Qemu)&quot; &quot;&quot; off \
++                  &quot;NE2000, 3Com 503 or WD based card (used by Bochs)&quot; &quot;&quot; off \
++                  &quot;AMD LANCE (used by VMware)&quot; &quot;&quot; on `
+     done
+ 
+     case $r in
+@@ -158,11 +157,11 @@
+ dhcp_or_manual() {
+     r=&quot;&quot;
+     while test -z &quot;$r&quot; ; do
+-    r=`dialog --no-cancel --stdout \
+-              --radiolist \
+-              &quot;Network Settings&quot; 0 0 0 \
+-              &quot;Manual&quot; &quot;&quot; on \
+-              &quot;DHCP&quot; &quot;&quot; off `
++        r=`dialog --no-cancel --stdout \
++                  --radiolist \
++                  &quot;Network Settings&quot; 0 0 0 \
++                  &quot;Manual&quot; &quot;&quot; on \
++                  &quot;DHCP&quot; &quot;&quot; off `
+     done
+     test &quot;$r&quot; = &quot;Manual&quot; &amp;&amp; netdhcp=0 || netdhcp=1
+ }
+@@ -170,14 +169,14 @@
+ network_settings() {
+     r=&quot;&quot;
+     while test -z &quot;$r&quot; ; do
+-    r=`dialog --no-cancel --stdout \
+-              --form \
+-              &quot;Network Settings&quot; 0 0 0 \
+-              &quot;IP Address&quot; 1 0 &quot;$netip&quot;   1 15 15 15 \
+-              &quot;Netmask&quot;    2 0 &quot;$netmask&quot; 2 15 15 15 \
+-              &quot;Nameserver&quot; 3 0 &quot;$netdns&quot;  3 15 15 15 \
+-              &quot;Gateway&quot;    4 0 &quot;$netgw&quot;   4 15 15 15 \
+-              &quot;MTU&quot;        5 0 &quot;$netmtu&quot;  5 15  5  5 `
++        r=`dialog --no-cancel --stdout \
++                  --form \
++                  &quot;Network Settings&quot; 0 0 0 \
++                  &quot;IP Address&quot; 1 0 &quot;$netip&quot;   1 15 15 15 \
++                  &quot;Netmask&quot;    2 0 &quot;$netmask&quot; 2 15 15 15 \
++                  &quot;Nameserver&quot; 3 0 &quot;$netdns&quot;  3 15 15 15 \
++                  &quot;Gateway&quot;    4 0 &quot;$netgw&quot;   4 15 15 15 \
++                  &quot;MTU&quot;        5 0 &quot;$netmtu&quot;  5 15  5  5 `
+     done
+     netip=`  echo &quot;$r&quot; | head -1`
+     netmask=`echo &quot;$r&quot; | head -2 | tail -1`
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000033.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.15,1.16
+</A></li>
+	<LI>Next message: <A HREF="000035.html">[Mpm-cvslog] lazybox TODO,NONE,1.1
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#34">[ date ]</a>
+              <a href="thread.html#34">[ thread ]</a>
+              <a href="subject.html#34">[ subject ]</a>
+              <a href="author.html#34">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">More information about the Mpm-cvslog
+mailing list</a><br>
+</body></html>

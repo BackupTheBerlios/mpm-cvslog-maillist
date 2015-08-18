@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Mpm-cvslog] mpmports/BOOTDISK README,1.8,1.9
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/mpm-cvslog/2007-June/index.html" >
+   <LINK REL="made" HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20README%2C1.8%2C1.9&In-Reply-To=%3C20070615221136.E1847A0BB2%40mail.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000004.html">
+   <LINK REL="Next"  HREF="000006.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Mpm-cvslog] mpmports/BOOTDISK README,1.8,1.9</H1>
+    <B>ivop</B> 
+    <A HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20README%2C1.8%2C1.9&In-Reply-To=%3C20070615221136.E1847A0BB2%40mail.berlios.de%3E"
+       TITLE="[Mpm-cvslog] mpmports/BOOTDISK README,1.8,1.9">nobody at sheep.berlios.de
+       </A><BR>
+    <I>Sat Jun 16 00:11:36 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000004.html">[Mpm-cvslog] mpmports/BOOTDISK/printparts printparts.c, 1.3,	1.4 printparts.h, 1.1, 1.2
+</A></li>
+        <LI>Next message: <A HREF="000006.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.4,1.5
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5">[ date ]</a>
+              <a href="thread.html#5">[ thread ]</a>
+              <a href="subject.html#5">[ subject ]</a>
+              <a href="author.html#5">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv10795
+
+Modified Files:
+	README 
+Log Message:
+update on 7zip/lzma compression
+
+
+Index: README
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/README,v
+retrieving revision 1.8
+retrieving revision 1.9
+diff -u -d -r1.8 -r1.9
+--- README	8 Nov 2006 21:57:55 -0000	1.8
++++ README	15 Jun 2007 22:09:15 -0000	1.9
+@@ -104,6 +104,13 @@
+ than bzip2, this could be usefull, as 7zip is able to compress up to 15%
+ smaller than bzip2 (relative to the compressed bz2 filesize).
+ 
++[update: I read the code of 7zip's LZMA SDK and this might be feasible. There
++is a decoder written in C which is fairly small already and runs on systems
++without (u)int64 support. Downside is that the encoder is written in either
++C++ or C# and no C version is available. By the looks of it, porting to C will
++take quite some time. I could of course encode under Linux or *BSD, but
++that will make mpmports not self-contained anymore.]
++
+ * 7unzipping bootloader
+ 
+ et cetera... :)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000004.html">[Mpm-cvslog] mpmports/BOOTDISK/printparts printparts.c, 1.3,	1.4 printparts.h, 1.1, 1.2
+</A></li>
+	<LI>Next message: <A HREF="000006.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.4,1.5
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5">[ date ]</a>
+              <a href="thread.html#5">[ thread ]</a>
+              <a href="subject.html#5">[ subject ]</a>
+              <a href="author.html#5">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">More information about the Mpm-cvslog
+mailing list</a><br>
+</body></html>

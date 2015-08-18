@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.7,1.8
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/mpm-cvslog/2007-June/index.html" >
+   <LINK REL="made" HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.7%2C1.8&In-Reply-To=%3C20070617225840.163DEF4C95%40mail.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000015.html">
+   <LINK REL="Next"  HREF="000017.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.7,1.8</H1>
+    <B>ivop</B> 
+    <A HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.7%2C1.8&In-Reply-To=%3C20070617225840.163DEF4C95%40mail.berlios.de%3E"
+       TITLE="[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.7,1.8">nobody at sheep.berlios.de
+       </A><BR>
+    <I>Mon Jun 18 00:58:40 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000015.html">[Mpm-cvslog] mpmports/BOOTDISK mk.usr.sh,1.3,1.4
+</A></li>
+        <LI>Next message: <A HREF="000017.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.8,1.9
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16">[ date ]</a>
+              <a href="thread.html#16">[ thread ]</a>
+              <a href="subject.html#16">[ subject ]</a>
+              <a href="author.html#16">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv12055
+
+Modified Files:
+	start.sh 
+Log Message:
+bringing up network
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.7
+retrieving revision 1.8
+diff -u -d -r1.7 -r1.8
+--- start.sh	16 Jun 2007 23:20:50 -0000	1.7
++++ start.sh	17 Jun 2007 22:56:16 -0000	1.8
+@@ -88,6 +88,8 @@
+ 
+ # -----------------------------------------------------------------------------
+ 
++allethdrivers=&quot;fxp dpeth rtl8139 dp8390 lance&quot;
++
+ ethernet_chip() {
+     r=`dialog --no-cancel --stdout \
+               --radiolist \
+@@ -105,14 +107,15 @@
+         *8139*) q=&quot;rtl8139@&quot; ;;
+         *8029*) q=&quot;<A HREF="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">dp8390 at DPETH0</A>=pci&quot; ;;
+         NE200*) q=&quot;<A HREF="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">dp8390 at DPETH0</A>=240:9&quot; ;;
+-        AMD*L*) q=&quot;lance@&quot; ;;
++        AMD*L*) q=&quot;<A HREF="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">lance at LANCE0</A>=on&quot; ;;
+         *)      echo &quot;This should not be possible. There's a bug in $0.&quot;
+                 exit 2 ;;
+     esac
+ 
+     ethname=&quot;$r&quot;
+     ethdriver=`echo &quot;$q&quot; | cut -d '@' -f 1`
+-    ethargs=&quot;${ethdriver}_args='&quot;`echo &quot;$q&quot; | cut -d '@' -f 2`&quot;'&quot;
++    ethjustargs=`echo &quot;$q&quot; | cut -d '@' -f 2`
++    ethargs=&quot;${ethdriver}_args='$ethjustargs'&quot;
+ }
+ 
+ dhcp_or_manual() {
+@@ -140,25 +143,64 @@
+     netmtu=` echo &quot;$r&quot; | head -5 | tail -1`
+ }
+ 
++kill_service_by_fullname() {
++    tmp=`ps -ef | grep $1 | grep -v grep`
++    pid=`echo $tmp | cut -d ' ' -f 4`
++    test -n &quot;$pid&quot; &amp;&amp; service down $pid
++}
++
++network_restart() {
++    echo &quot;eth0 $ethdriver 0 { default; };&quot; &gt; /etc/inet.conf
++    echo &quot;127.0.0.1 localhost&quot; &gt;  /etc/hosts
++    echo &quot;$netdns %nameserver&quot; &gt;&gt; /etc/hosts
++    echo &quot;minix-install&quot; &gt; /etc/hostname.file
++
++    pid=`cat /usr/run/nonamed.pid` 2&gt;/dev/null
++    test -n &quot;$pid&quot; &amp;&amp; kill $pid
++    kill_service_by_fullname /sbin/inet
++
++    for i in $allethdrivers ; do
++        kill_service_by_fullname /sbin/$i
++    done
++
++    echo &quot;Bringing up network...&quot;
++
++    test -n &quot;$ethjustargs&quot; &amp;&amp; args=&quot;-args $ethargs&quot;
++    service up /sbin/$ethdriver $args -period 5HZ
++    service up /sbin/inet
++    ifconfig -I /dev/ip -h $netip -n $netmask -m $netmtu
++    add_route -I /dev/ip -g $netgw
++    nonamed -L &amp;
++}
++
+ # -----------------------------------------------------------------------------
+ 
+ ethname=&quot;none&quot;
+ ethdriver=&quot;none&quot;
+ ethargs=&quot;&quot;
++ethjustargs=&quot;&quot;
+ netdhcp=0
+ netip=192.168.0.
+ netmask=255.255.255.0
+ netdns=192.168.0.1
+ netgw=192.168.0.1
+ netmtu=1500
++netup=no
+ 
+ welcome
+ set_keymap
+ time_and_date
+ at_or_bios_wini
+-ethernet_chip
+-dhcp_or_manual
+-test $netdhcp -eq 0 &amp;&amp; network_settings
++
++while test &quot;$netup&quot; = &quot;no&quot; ; do
++    ethernet_chip
++    dhcp_or_manual
++    test $netdhcp -eq 0 &amp;&amp; network_settings
++
++    network_restart
++
++    ping $netdns &gt;/dev/null 2&gt;&amp;1 &amp;&amp; netup=yes
++done
+ 
+ # -----------------------------------------------------------------------------
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000015.html">[Mpm-cvslog] mpmports/BOOTDISK mk.usr.sh,1.3,1.4
+</A></li>
+	<LI>Next message: <A HREF="000017.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.8,1.9
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16">[ date ]</a>
+              <a href="thread.html#16">[ thread ]</a>
+              <a href="subject.html#16">[ subject ]</a>
+              <a href="author.html#16">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">More information about the Mpm-cvslog
+mailing list</a><br>
+</body></html>

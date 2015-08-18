@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Mpm-cvslog] mpmports/BOOTDISK rc.usr,1.6,1.7
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/mpm-cvslog/2007-June/index.html" >
+   <LINK REL="made" HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20rc.usr%2C1.6%2C1.7&In-Reply-To=%3C20070617200318.39EE3E33CA%40mail.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000010.html">
+   <LINK REL="Next"  HREF="000012.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Mpm-cvslog] mpmports/BOOTDISK rc.usr,1.6,1.7</H1>
+    <B>ivop</B> 
+    <A HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20rc.usr%2C1.6%2C1.7&In-Reply-To=%3C20070617200318.39EE3E33CA%40mail.berlios.de%3E"
+       TITLE="[Mpm-cvslog] mpmports/BOOTDISK rc.usr,1.6,1.7">nobody at sheep.berlios.de
+       </A><BR>
+    <I>Sun Jun 17 22:03:18 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000010.html">[Mpm-cvslog] mpmports/BOOTDISK rc.usr,1.5,1.6
+</A></li>
+        <LI>Next message: <A HREF="000012.html">[Mpm-cvslog] mpmports/BOOTDISK rc.usr,1.7,1.8
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11">[ date ]</a>
+              <a href="thread.html#11">[ thread ]</a>
+              <a href="subject.html#11">[ subject ]</a>
+              <a href="author.html#11">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv29546
+
+Modified Files:
+	rc.usr 
+Log Message:
+move /usr/etc/services to /etc/services
+
+
+Index: rc.usr
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/rc.usr,v
+retrieving revision 1.6
+retrieving revision 1.7
+diff -u -d -r1.6 -r1.7
+--- rc.usr	17 Jun 2007 20:00:20 -0000	1.6
++++ rc.usr	17 Jun 2007 20:00:56 -0000	1.7
+@@ -45,7 +45,7 @@
+ ln -s /usr/tmp /tmp
+ rm -rf /dev
+ cd /usr/etc
+-cp termcap passwd group /etc
++cp termcap passwd group services /etc
+ ln -s /usr/bin/lazybox /bin/pwd
+ ln -s /usr/sbin /sbin
+ mkdir /mnt
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000010.html">[Mpm-cvslog] mpmports/BOOTDISK rc.usr,1.5,1.6
+</A></li>
+	<LI>Next message: <A HREF="000012.html">[Mpm-cvslog] mpmports/BOOTDISK rc.usr,1.7,1.8
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11">[ date ]</a>
+              <a href="thread.html#11">[ thread ]</a>
+              <a href="subject.html#11">[ subject ]</a>
+              <a href="author.html#11">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">More information about the Mpm-cvslog
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.23,1.24
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/mpm-cvslog/2007-June/index.html" >
+   <LINK REL="made" HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.23%2C1.24&In-Reply-To=%3C20070620193209.AC8A0F5617%40mail.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000042.html">
+   <LINK REL="Next"  HREF="000044.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.23,1.24</H1>
+    <B>ivop</B> 
+    <A HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.23%2C1.24&In-Reply-To=%3C20070620193209.AC8A0F5617%40mail.berlios.de%3E"
+       TITLE="[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.23,1.24">nobody at sheep.berlios.de
+       </A><BR>
+    <I>Wed Jun 20 21:32:09 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000042.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.22,1.23
+</A></li>
+        <LI>Next message: <A HREF="000044.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.24,1.25
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#43">[ date ]</a>
+              <a href="thread.html#43">[ thread ]</a>
+              <a href="subject.html#43">[ subject ]</a>
+              <a href="author.html#43">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv3024
+
+Modified Files:
+	start.sh 
+Log Message:
+put network related code in own function
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.23
+retrieving revision 1.24
+diff -u -d -r1.23 -r1.24
+--- start.sh	20 Jun 2007 17:14:52 -0000	1.23
++++ start.sh	20 Jun 2007 19:29:46 -0000	1.24
+@@ -233,6 +233,36 @@
+     sleep 1
+ }
+ 
++network() {
++    while test &quot;$netup&quot; = &quot;no&quot; ; do
++        ethernet_chip
++        dhcp_or_manual
++        test $netdhcp -eq 0 &amp;&amp; network_settings
++
++        network_restart
++
++        netup=yes
++
++        trap '' 2
++        intr -t 10 hostaddr -h || netup=no
++        trap 2
++
++        if test &quot;$netup&quot; = &quot;yes&quot; ; then
++            trap '' 2
++            intr -t 10 ping $netdns &gt;/dev/null 2&gt;&amp;1 || netup=no
++            trap 2
++        fi
++
++        if test &quot;$netup&quot; = &quot;no&quot; ; then
++            dialog --ok-label &quot;Retry&quot; \
++                   --msgbox &quot;Cannot bring up networking!&quot; 5 40
++        else
++            dialog --ok-label &quot;Continue&quot; \
++                   --msgbox &quot;Networking OK&quot; 5 40
++        fi
++    done
++}
++
+ # -----------------------------------------------------------------------------
+ 
+ ethname=&quot;none&quot;
+@@ -251,32 +281,7 @@
+ set_keymap
+ time_and_date
+ at_or_bios_wini
+-
+-while test &quot;$netup&quot; = &quot;no&quot; ; do
+-    ethernet_chip
+-    dhcp_or_manual
+-    test $netdhcp -eq 0 &amp;&amp; network_settings
+-
+-    network_restart
+-
+-    netup=yes
+-
+-    trap '' 2
+-    intr -t 10 hostaddr -h || netup=no
+-    trap 2
+-
+-    if test &quot;$netup&quot; = &quot;yes&quot; ; then
+-        trap '' 2
+-        intr -t 10 ping $netdns &gt;/dev/null 2&gt;&amp;1 || netup=no
+-        trap 2
+-    fi
+-
+-    if test &quot;$netup&quot; = &quot;no&quot; ; then
+-        dialog --ok-label &quot;Retry&quot; --msgbox &quot;Cannot bring up networking!&quot; 5 40
+-    else
+-        dialog --ok-label &quot;Continue&quot; --msgbox &quot;Networking OK&quot; 5 40
+-    fi
+-done
++network
+ 
+ # -----------------------------------------------------------------------------
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000042.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.22,1.23
+</A></li>
+	<LI>Next message: <A HREF="000044.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.24,1.25
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#43">[ date ]</a>
+              <a href="thread.html#43">[ thread ]</a>
+              <a href="subject.html#43">[ subject ]</a>
+              <a href="author.html#43">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">More information about the Mpm-cvslog
+mailing list</a><br>
+</body></html>

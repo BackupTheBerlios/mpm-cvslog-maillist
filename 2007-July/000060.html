@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.34,1.35
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/mpm-cvslog/2007-July/index.html" >
+   <LINK REL="made" HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.34%2C1.35&In-Reply-To=%3C20070630221401.DEC90F6860%40mail.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000061.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.34,1.35</H1>
+    <B>ivop</B> 
+    <A HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.34%2C1.35&In-Reply-To=%3C20070630221401.DEC90F6860%40mail.berlios.de%3E"
+       TITLE="[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.34,1.35">nobody at sheep.berlios.de
+       </A><BR>
+    <I>Sun Jul  1 00:14:01 CEST 2007</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000061.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.35,1.36
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#60">[ date ]</a>
+              <a href="thread.html#60">[ thread ]</a>
+              <a href="subject.html#60">[ subject ]</a>
+              <a href="author.html#60">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv1656
+
+Modified Files:
+	start.sh 
+Log Message:
+sub-partitions
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.34
+retrieving revision 1.35
+diff -u -d -r1.34 -r1.35
+--- start.sh	30 Jun 2007 21:32:22 -0000	1.34
++++ start.sh	30 Jun 2007 22:13:57 -0000	1.35
+@@ -320,12 +320,51 @@
+     done
+ }
+ 
++part_subs() {
++    printparts -m -d | grep &quot;$instprim&quot; &gt; $devdump
++
++    doautopart=no
++
++    insts0=&quot;$instprim/s0&quot;
++    insts1=&quot;$instprim/s1&quot;
++    insts2=&quot;$instprim/s2&quot;
++
++    s0=`cat $devdump | grep &quot;$insts0&quot;`
++    s1=`cat $devdump | grep &quot;$insts1&quot;`
++    s2=`cat $devdump | grep &quot;$insts2&quot;`
++
++    r=&quot;&quot;
++    while test -z &quot;$r&quot; ; do
++        if test -n &quot;$s0&quot; -a -n &quot;$s1&quot; -a -n &quot;$s2&quot; ; then
++            dialog --stdout --no-cancel --yesno \
++&quot;Selected primary partition: $instprim
++
++Use existing sub-partitions?&quot; 7 50
++            r=&quot;$?&quot;
++            case &quot;$r&quot; in
++                0)  return  ;;
++                1)          ;;  # NO, next step
++                *)  r=&quot;&quot;    ;;  # ESC, repeat
++            esac
++        fi
++    done
++
++    doautopart=yes
++}
++
++part_confirm() {
++    :
++}
++
+ partitions() {
+     partdone=no
+ 
+     while test &quot;$partdone&quot; = &quot;no&quot; ; do
+         part_intro
++        instprim=&quot;&quot;
+         part_menu
++        part_subs
++        part_confirm
+     done
+ }
+ 
+@@ -346,12 +385,16 @@
+ insts0=&quot;&quot;       # /
+ insts1=&quot;&quot;       # /home
+ insts2=&quot;&quot;       # /usr
++doautopart=no
++formats0=yes
++formats1=no
++formats2=yes
+ 
+ welcome
+-set_keymap
+-time_and_date
+-at_or_bios_wini
+-network
++#set_keymap
++#time_and_date
++#at_or_bios_wini
++#network
+ partitions
+ 
+ # -----------------------------------------------------------------------------
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000061.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.35,1.36
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#60">[ date ]</a>
+              <a href="thread.html#60">[ thread ]</a>
+              <a href="subject.html#60">[ subject ]</a>
+              <a href="author.html#60">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">More information about the Mpm-cvslog
+mailing list</a><br>
+</body></html>

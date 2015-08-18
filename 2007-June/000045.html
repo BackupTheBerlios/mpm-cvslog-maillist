@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Mpm-cvslog] mpmports/BOOTDISK start.sh,1.25,1.26
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/mpm-cvslog/2007-June/index.html" >
+   <LINK REL="made" HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.25%2C1.26&In-Reply-To=%3C20070620193514.E10E0F41BF%40mail.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000044.html">
+   <LINK REL="Next"  HREF="000046.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.25,1.26</H1>
+    <B>ivop</B> 
+    <A HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20mpmports/BOOTDISK%20start.sh%2C1.25%2C1.26&In-Reply-To=%3C20070620193514.E10E0F41BF%40mail.berlios.de%3E"
+       TITLE="[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.25,1.26">nobody at sheep.berlios.de
+       </A><BR>
+    <I>Wed Jun 20 21:35:14 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000044.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.24,1.25
+</A></li>
+        <LI>Next message: <A HREF="000046.html">[Mpm-cvslog] mpmports/BOOTDISK/printparts printparts.c,1.4,1.5
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#45">[ date ]</a>
+              <a href="thread.html#45">[ thread ]</a>
+              <a href="subject.html#45">[ subject ]</a>
+              <a href="author.html#45">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Update of /cvsroot/mpm/mpmports/BOOTDISK
+In directory sheep:/tmp/cvs-serv3993
+
+Modified Files:
+	start.sh 
+Log Message:
+set about dialog's exit button label
+
+
+Index: start.sh
+===================================================================
+RCS file: /cvsroot/mpm/mpmports/BOOTDISK/start.sh,v
+retrieving revision 1.25
+retrieving revision 1.26
+diff -u -d -r1.25 -r1.26
+--- start.sh	20 Jun 2007 19:31:33 -0000	1.25
++++ start.sh	20 Jun 2007 19:32:51 -0000	1.26
+@@ -33,7 +33,8 @@
+         case &quot;$r&quot; in
+             Install)    : ;;
+             About)
+-                dialog --no-cancel --begin 3 1 --textbox $ABOUT 20 76 
++                dialog --no-cancel --exit-label &quot;Back&quot; \
++                       --begin 3 1 --textbox $ABOUT 20 76 
+                 ;;
+             Exit)       exit 0 ;;
+         esac
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000044.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.24,1.25
+</A></li>
+	<LI>Next message: <A HREF="000046.html">[Mpm-cvslog] mpmports/BOOTDISK/printparts printparts.c,1.4,1.5
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#45">[ date ]</a>
+              <a href="thread.html#45">[ thread ]</a>
+              <a href="subject.html#45">[ subject ]</a>
+              <a href="author.html#45">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">More information about the Mpm-cvslog
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,364 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Mpm-cvslog] gfx generic.c, 1.5, 1.6 generic.h, 1.3, 1.4 gfx.c, 1.6,	1.7 gfx.h, 1.16, 1.17 gfx_ioctl.c, 1.10, 1.11 gfx_ioctl.h,	1.10, 1.11 license.h, 1.1, 1.2 svga_vesa.c, 1.5, 1.6 vesa.h,	1.3, 1.4 vga_bios.c, 1.17, 1.18 vga_raw.c, 1.34,	1.35 vga_regs.h, 1.2, 1.3
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/mpm-cvslog/2007-June/index.html" >
+   <LINK REL="made" HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20gfx%20generic.c%2C%201.5%2C%201.6%20generic.h%2C%201.3%2C%201.4%20gfx.c%2C%201.6%2C%0A%091.7%20gfx.h%2C%201.16%2C%201.17%20gfx_ioctl.c%2C%201.10%2C%201.11%20gfx_ioctl.h%2C%0A%091.10%2C%201.11%20license.h%2C%201.1%2C%201.2%20svga_vesa.c%2C%201.5%2C%201.6%20vesa.h%2C%0A%091.3%2C%201.4%20vga_bios.c%2C%201.17%2C%201.18%20vga_raw.c%2C%201.34%2C%0A%091.35%20vga_regs.h%2C%201.2%2C%201.3&In-Reply-To=%3C20070621102422.7F344F5B2F%40mail.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000049.html">
+   <LINK REL="Next"  HREF="000051.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Mpm-cvslog] gfx generic.c, 1.5, 1.6 generic.h, 1.3, 1.4 gfx.c, 1.6,	1.7 gfx.h, 1.16, 1.17 gfx_ioctl.c, 1.10, 1.11 gfx_ioctl.h,	1.10, 1.11 license.h, 1.1, 1.2 svga_vesa.c, 1.5, 1.6 vesa.h,	1.3, 1.4 vga_bios.c, 1.17, 1.18 vga_raw.c, 1.34,	1.35 vga_regs.h, 1.2, 1.3</H1>
+    <B>ivop</B> 
+    <A HREF="mailto:mpm-cvslog%40lists.berlios.de?Subject=Re%3A%20%5BMpm-cvslog%5D%20gfx%20generic.c%2C%201.5%2C%201.6%20generic.h%2C%201.3%2C%201.4%20gfx.c%2C%201.6%2C%0A%091.7%20gfx.h%2C%201.16%2C%201.17%20gfx_ioctl.c%2C%201.10%2C%201.11%20gfx_ioctl.h%2C%0A%091.10%2C%201.11%20license.h%2C%201.1%2C%201.2%20svga_vesa.c%2C%201.5%2C%201.6%20vesa.h%2C%0A%091.3%2C%201.4%20vga_bios.c%2C%201.17%2C%201.18%20vga_raw.c%2C%201.34%2C%0A%091.35%20vga_regs.h%2C%201.2%2C%201.3&In-Reply-To=%3C20070621102422.7F344F5B2F%40mail.berlios.de%3E"
+       TITLE="[Mpm-cvslog] gfx generic.c, 1.5, 1.6 generic.h, 1.3, 1.4 gfx.c, 1.6,	1.7 gfx.h, 1.16, 1.17 gfx_ioctl.c, 1.10, 1.11 gfx_ioctl.h,	1.10, 1.11 license.h, 1.1, 1.2 svga_vesa.c, 1.5, 1.6 vesa.h,	1.3, 1.4 vga_bios.c, 1.17, 1.18 vga_raw.c, 1.34,	1.35 vga_regs.h, 1.2, 1.3">nobody at sheep.berlios.de
+       </A><BR>
+    <I>Thu Jun 21 12:24:22 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000049.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.27,1.28
+</A></li>
+        <LI>Next message: <A HREF="000051.html">[Mpm-cvslog] lazybox lazybox.c,1.11,1.12
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#50">[ date ]</a>
+              <a href="thread.html#50">[ thread ]</a>
+              <a href="subject.html#50">[ subject ]</a>
+              <a href="author.html#50">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Update of /cvsroot/mpm/gfx
+In directory sheep:/tmp/cvs-serv28948
+
+Modified Files:
+	generic.c generic.h gfx.c gfx.h gfx_ioctl.c gfx_ioctl.h 
+	license.h svga_vesa.c vesa.h vga_bios.c vga_raw.c vga_regs.h 
+Log Message:
+remove references to regents
+
+
+Index: generic.c
+===================================================================
+RCS file: /cvsroot/mpm/gfx/generic.c,v
+retrieving revision 1.5
+retrieving revision 1.6
+diff -u -d -r1.5 -r1.6
+--- generic.c	21 Nov 2006 18:41:09 -0000	1.5
++++ generic.c	21 Jun 2007 10:21:58 -0000	1.6
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: generic.h
+===================================================================
+RCS file: /cvsroot/mpm/gfx/generic.h,v
+retrieving revision 1.3
+retrieving revision 1.4
+diff -u -d -r1.3 -r1.4
+--- generic.h	19 Nov 2006 21:21:29 -0000	1.3
++++ generic.h	21 Jun 2007 10:21:58 -0000	1.4
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: gfx.c
+===================================================================
+RCS file: /cvsroot/mpm/gfx/gfx.c,v
+retrieving revision 1.6
+retrieving revision 1.7
+diff -u -d -r1.6 -r1.7
+--- gfx.c	21 Nov 2006 18:41:09 -0000	1.6
++++ gfx.c	21 Jun 2007 10:21:58 -0000	1.7
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: gfx.h
+===================================================================
+RCS file: /cvsroot/mpm/gfx/gfx.h,v
+retrieving revision 1.16
+retrieving revision 1.17
+diff -u -d -r1.16 -r1.17
+--- gfx.h	21 Nov 2006 18:41:09 -0000	1.16
++++ gfx.h	21 Jun 2007 10:21:58 -0000	1.17
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: gfx_ioctl.c
+===================================================================
+RCS file: /cvsroot/mpm/gfx/gfx_ioctl.c,v
+retrieving revision 1.10
+retrieving revision 1.11
+diff -u -d -r1.10 -r1.11
+--- gfx_ioctl.c	21 Nov 2006 18:41:09 -0000	1.10
++++ gfx_ioctl.c	21 Jun 2007 10:21:58 -0000	1.11
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: gfx_ioctl.h
+===================================================================
+RCS file: /cvsroot/mpm/gfx/gfx_ioctl.h,v
+retrieving revision 1.10
+retrieving revision 1.11
+diff -u -d -r1.10 -r1.11
+--- gfx_ioctl.h	19 Nov 2006 21:04:42 -0000	1.10
++++ gfx_ioctl.h	21 Jun 2007 10:21:58 -0000	1.11
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: license.h
+===================================================================
+RCS file: /cvsroot/mpm/gfx/license.h,v
+retrieving revision 1.1
+retrieving revision 1.2
+diff -u -d -r1.1 -r1.2
+--- license.h	19 Nov 2006 21:04:42 -0000	1.1
++++ license.h	21 Jun 2007 10:21:58 -0000	1.2
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: svga_vesa.c
+===================================================================
+RCS file: /cvsroot/mpm/gfx/svga_vesa.c,v
+retrieving revision 1.5
+retrieving revision 1.6
+diff -u -d -r1.5 -r1.6
+--- svga_vesa.c	21 Nov 2006 18:41:09 -0000	1.5
++++ svga_vesa.c	21 Jun 2007 10:21:58 -0000	1.6
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+@@ -141,13 +141,27 @@
+         report(myname, tmp, NO_NUM);
+         snprintf(tmp, 80, &quot;TotalMemory: %i kB&quot;, VI_TOTALMEMORY(vesa) * 64);
+         report(myname, tmp, NO_NUM);
+-        r = sys_umap(SELF, D, tmp, 80, &amp;tmp_phys);
++        r = sys_umap(SELF, D, (vir_bytes) tmp, 80, &amp;tmp_phys);
+         if (r != OK) panic(myname, &quot;sys_umap failed&quot;, r);
+         ptr = ((VI_OEMSTRINGPTR(vesa) &gt;&gt; 12) &amp; 0x000f0000) + (VI_OEMSTRINGPTR(vesa) &amp; 0x0000ffff);
+         r = sys_abscopy(ptr, tmp_phys, 80);
+         if (r != OK) panic(myname, &quot;sys_abscopy failed&quot;, r);
+         tmp[79] = 0;
+         report(myname, tmp, NO_NUM);
++
++        ptr = ((VI_VIDEOMODEPTR(vesa) &gt;&gt; 12) &amp; 0x000f0000) + (VI_VIDEOMODEPTR(vesa) &amp; 0x0000ffff);
++
++#if 0
++        do {
++            int i;
++            r = sys_abscopy(ptr, tmp_phys, 2);
++            if (r != OK) panic(myname, &quot;sys_abscopy failed&quot;, r);
++            ptr += 2;
++            i = (tmp[1]&lt;&lt;8)+tmp[0];
++            snprintf(tmp, 80, &quot;listed mode: %04x&quot;, i);
++            report(myname, tmp, NO_NUM);
++        } while (i &gt;= 0);
++#endif
+     }
+ #endif
+ 
+
+Index: vesa.h
+===================================================================
+RCS file: /cvsroot/mpm/gfx/vesa.h,v
+retrieving revision 1.3
+retrieving revision 1.4
+diff -u -d -r1.3 -r1.4
+--- vesa.h	20 Nov 2006 22:26:05 -0000	1.3
++++ vesa.h	21 Jun 2007 10:21:58 -0000	1.4
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: vga_bios.c
+===================================================================
+RCS file: /cvsroot/mpm/gfx/vga_bios.c,v
+retrieving revision 1.17
+retrieving revision 1.18
+diff -u -d -r1.17 -r1.18
+--- vga_bios.c	21 Nov 2006 18:41:09 -0000	1.17
++++ vga_bios.c	21 Jun 2007 10:21:58 -0000	1.18
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: vga_raw.c
+===================================================================
+RCS file: /cvsroot/mpm/gfx/vga_raw.c,v
+retrieving revision 1.34
+retrieving revision 1.35
+diff -u -d -r1.34 -r1.35
+--- vga_raw.c	21 Nov 2006 18:41:09 -0000	1.34
++++ vga_raw.c	21 Jun 2007 10:21:58 -0000	1.35
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+Index: vga_regs.h
+===================================================================
+RCS file: /cvsroot/mpm/gfx/vga_regs.h,v
+retrieving revision 1.2
+retrieving revision 1.3
+diff -u -d -r1.2 -r1.3
+--- vga_regs.h	19 Nov 2006 21:04:42 -0000	1.2
++++ vga_regs.h	21 Jun 2007 10:21:58 -0000	1.3
+@@ -13,10 +13,10 @@
+  *     * My name may NOT be used to endorse or promote products derived from
+  *       this software without specific prior written permission.
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000049.html">[Mpm-cvslog] mpmports/BOOTDISK start.sh,1.27,1.28
+</A></li>
+	<LI>Next message: <A HREF="000051.html">[Mpm-cvslog] lazybox lazybox.c,1.11,1.12
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#50">[ date ]</a>
+              <a href="thread.html#50">[ thread ]</a>
+              <a href="subject.html#50">[ subject ]</a>
+              <a href="author.html#50">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/mpm-cvslog">More information about the Mpm-cvslog
+mailing list</a><br>
+</body></html>
